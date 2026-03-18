@@ -14,3 +14,27 @@ theme = 'PaperMod'
 [[params.socialIcons]]
     name = "email"
     url = "mailto:abcv@123456+789"
+
+[[menu.main]]
+    name = "关于"
+    url = "/about"
+    weight = 20
+
+[[menu.main]]
+    name = "存档"
+    url = "/archives"
+    weight = 10
+
+[params]
+    ShowToc = true          # 自动显示目录
+    TocOpen = true         # 默认展开目录
+    ShowReadingTime = true # 显示阅读时间
+    ShowPostNavLinks = true # 显示上一篇/下一篇文章
+
+[outputs]
+    home = ["HTML", "RSS", "JSON"] # 必须添加 JSON 以便搜索插件读取数据
+
+[[menu.main]]
+    name = "搜索"
+    url = "/search"
+    weight = 5
