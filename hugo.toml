@@ -30,7 +30,7 @@ theme = 'PaperMod'
     TocOpen = true         # 默认展开目录
     ShowReadingTime = true # 显示阅读时间
     ShowPostNavLinks = true # 显示上一篇/下一篇文章
-
+    assets.disableHLJS = false
 [outputs]
     home = ["HTML", "RSS", "JSON"] # 必须添加 JSON 以便搜索插件读取数据
 
