@@ -38,3 +38,6 @@ theme = 'PaperMod'
     name = "搜索"
     url = "/search"
     weight = 5
+
+pygmentsCodefences = true
+pygmentsStyle = "monokai" # 或者 dracula, github-dark
