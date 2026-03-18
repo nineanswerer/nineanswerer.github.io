@@ -2,3 +2,15 @@ baseURL = 'https://nineanswerer.github.io/'
 languageCode = 'en-us'
 title = '我的个人博客'
 theme = 'PaperMod'
+
+[params.homeInfoParams]
+    Title = "你好，我是 NineAnswerer 👋"
+    Content = "这是我的个人博客。我关注大数据、AI 和机器人。欢迎交流！"
+        imageUrl = "avatar.png"
+[[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/nineanswerer"
+
+[[params.socialIcons]]
+    name = "email"
+    url = "mailto:abcv@123456+789"
