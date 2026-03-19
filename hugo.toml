@@ -36,6 +36,8 @@ pygmentsStyle = "monokai"
     ShowReadingTime = true    # 显示阅读时间
     ShowPostNavLinks = true   # 显示上一篇/下一篇文章
     env = "production"        # 生产环境控制
+    displayFullPostContent = false
+    showShareButtons = true
 
     # --- 首页个人名片模式 (Profile Mode) ---
     [params.homeInfoParams]

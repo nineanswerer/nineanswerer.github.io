@@ -5,6 +5,8 @@ title = 'Git 深度学习与 Hugo 博客搭建：从 404 到正式上线'
 summary = "记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。"
 categories = ["技术总结"]
 tags = ["Git", "Hugo", "GitHub Pages"]
+showToc: true
+TocOpen: false
 +++
 
 ## 前言
