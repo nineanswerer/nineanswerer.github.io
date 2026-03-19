@@ -35,6 +35,7 @@ pygmentsStyle = "monokai"
     TocOpen = true           # 默认展开目录
     ShowReadingTime = true    # 显示阅读时间
     ShowPostNavLinks = true   # 显示上一篇/下一篇文章
+    ShowWordCount = true
     env = "production"        # 生产环境控制
     displayFullPostContent = false
     showShareButtons = true
@@ -43,6 +44,7 @@ pygmentsStyle = "monokai"
     description = "NineAnswerer 的技术博客 - 专注于大数据、AI 与机器学习实战分享"
     keywords = ["大数据", "HBase", "Hadoop", "机器学习", "Hugo", "PaperMod"]
     author = "NineAnswerer"
+    hasCJKLanguage = true        # 开启中日韩语言支持，否则字数统计会不准
 
     # --- 首页个人名片模式 (Profile Mode) ---
     [params.homeInfoParams]

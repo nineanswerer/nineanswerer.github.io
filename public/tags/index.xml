@@ -2,38 +2,38 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on NineAnswerer 的个人博客</title>
-    <link>http://localhost:9552/tags/</link>
+    <link>http://localhost:10842/tags/</link>
     <description>Recent content in Tags on NineAnswerer 的个人博客</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Thu, 19 Mar 2026 14:45:49 +0800</lastBuildDate>
-    <atom:link href="http://localhost:9552/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:10842/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Untagged</title>
-      <link>http://localhost:9552/tags/untagged/</link>
+      <link>http://localhost:10842/tags/untagged/</link>
       <pubDate>Thu, 19 Mar 2026 14:45:49 +0800</pubDate>
-      <guid>http://localhost:9552/tags/untagged/</guid>
+      <guid>http://localhost:10842/tags/untagged/</guid>
       <description></description>
     </item>
     <item>
       <title>Git</title>
-      <link>http://localhost:9552/tags/git/</link>
+      <link>http://localhost:10842/tags/git/</link>
       <pubDate>Wed, 18 Mar 2026 21:47:44 +0800</pubDate>
-      <guid>http://localhost:9552/tags/git/</guid>
+      <guid>http://localhost:10842/tags/git/</guid>
       <description></description>
     </item>
     <item>
       <title>GitHub Pages</title>
-      <link>http://localhost:9552/tags/github-pages/</link>
+      <link>http://localhost:10842/tags/github-pages/</link>
       <pubDate>Wed, 18 Mar 2026 21:47:44 +0800</pubDate>
-      <guid>http://localhost:9552/tags/github-pages/</guid>
+      <guid>http://localhost:10842/tags/github-pages/</guid>
       <description></description>
     </item>
     <item>
       <title>Hugo</title>
-      <link>http://localhost:9552/tags/hugo/</link>
+      <link>http://localhost:10842/tags/hugo/</link>
       <pubDate>Wed, 18 Mar 2026 21:47:44 +0800</pubDate>
-      <guid>http://localhost:9552/tags/hugo/</guid>
+      <guid>http://localhost:10842/tags/hugo/</guid>
       <description></description>
     </item>
   </channel>
