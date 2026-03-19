@@ -40,6 +40,9 @@ pygmentsStyle = "monokai"
     showShareButtons = true
     ShowCodeCopyButtons = true # 开启代码块右上角的复制按钮
     comments = true
+    description = "NineAnswerer 的技术博客 - 专注于大数据、AI 与机器学习实战分享"
+    keywords = ["大数据", "HBase", "Hadoop", "机器学习", "Hugo", "PaperMod"]
+    author = "NineAnswerer"
 
     # --- 首页个人名片模式 (Profile Mode) ---
     [params.homeInfoParams]
