@@ -39,6 +39,7 @@ pygmentsStyle = "monokai"
     displayFullPostContent = false
     showShareButtons = true
     ShowCodeCopyButtons = true # 开启代码块右上角的复制按钮
+    comments = true
 
     # --- 首页个人名片模式 (Profile Mode) ---
     [params.homeInfoParams]
