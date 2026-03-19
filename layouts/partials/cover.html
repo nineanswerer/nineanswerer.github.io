@@ -1,65 +1,51 @@
-{{- with .cxt}} {{/* Apply proper context from dict */}}
-{{- if (and .Params.cover.image (not $.isHidden)) }}
+{{- with .cxt }}
+{{- $coverParam := .Params.cover.image }}
+
+{{- /* 1. 自动选图逻辑：改用字符长度和字符串处理生成索引 */ -}}
+{{- if (or (not $coverParam) (eq $coverParam "")) }}
+    {{- /* 将标题转为 URL 格式并计算长度，作为一个基础数字 */ -}}
+    {{- $seed := .Title | urlize | len }}
+    {{- /* 再加上标题第一个字母的顺序（利用 hash 只是为了转成数字） */ -}}
+    {{- $hashStr := .Title | md5 }}
+    {{- /* 截取哈希字符串的前几位并转为十进制（Hugo 兼容写法） */ -}}
+    {{- $imgIndex := (mod $seed 20 | add 1) }}
+    
+    {{- /* 如果觉得 $seed 太简单，可以加上 md5 的长度变化 */ -}}
+    {{- $coverParam = printf "/images/covers/%d.jpg" $imgIndex }}
+{{- end }}
+
+{{- /* 2. 渲染逻辑 */ -}}
+{{- if (not $.isHidden) }}
 <figure class="entry-cover">
     {{- $loading := cond $.IsSingle "eager" "lazy" }}
     {{- $addLink := (and site.Params.cover.linkFullImages $.IsSingle) }}
-    {{- $prod := (hugo.IsProduction | or (eq site.Params.env "production")) }}
-    {{- $alt := (.Params.cover.alt | default .Params.cover.caption | plainify) }}
-    {{- $responsiveImages := (.Params.cover.responsiveImages | default site.Params.cover.responsiveImages) | default true }}
+    {{- $alt := (.Params.cover.alt | default .Params.cover.caption | plainify | default .Title) }}
 
-    {{- $pageBundleCover := (.Resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
-    {{- $globalResourcesCover := (resources.ByType "image").GetMatch (printf "*%s*" (.Params.cover.image)) }}
+    {{- /* 检查全局资源或页面资源 */ -}}
+    {{- $pageBundleCover := (.Resources.ByType "image").GetMatch (printf "*%s*" $coverParam) }}
+    {{- $globalResourcesCover := (resources.ByType "image").GetMatch (printf "*%s*" $coverParam) }}
     {{- $cover := (or $pageBundleCover $globalResourcesCover)}}
-    {{- /* We are not using the .Param.cover.relative to decide the location of image */}}
-    {{- /* If we have the image in pageBundle or globalResources we can process the image */}}
-
-    {{- $sizes := (slice "360" "480" "720" "1080" "1500") }}
-    {{- $processableFormats := (slice "jpg" "jpeg" "png" "tif" "bmp" "gif") -}}
-    {{- if hugo.IsExtended -}}
-        {{- $processableFormats = $processableFormats | append "webp" -}}
-    {{- end -}}
-
-    {{- $imgdl := (.Params.cover.image) | absURL }}
-    {{- if $cover -}}
-        {{- $imgdl = $cover.Permalink }}
-    {{- end -}}
 
     {{- if $addLink }}
-        <a href="{{ $imgdl }}" target="_blank" rel="noopener noreferrer">
+        <a href="{{ $coverParam | absURL }}" target="_blank" rel="noopener noreferrer">
     {{- end }}
 
-    {{- if $cover -}}
-        {{/* i.e it is present in page bundle */}}
-        {{- if (and (in $processableFormats $cover.MediaType.SubType) ($responsiveImages) (eq $prod true)) }}
-            <img loading="{{$loading}}"
-                srcset='{{- range $size := $sizes -}}
-                            {{- if (ge $cover.Width $size) }}
-                                {{- printf "%s %s" (($cover.Resize (printf "%sx" $size)).Permalink) (printf "%sw," $size) }}
-                            {{- end }}
-                        {{- end }}
-                        {{- printf "%s %dw" ($cover.Permalink) ($cover.Width) }}'
-                src="{{ $cover.Permalink }}"
-                sizes="(min-width: 768px) 720px, 100vw"
-                width="{{ $cover.Width }}" height="{{ $cover.Height }}"
-                alt="{{ $alt }}">
-        {{- else }}{{/* Unprocessable image or responsive images disabled */}}
-            <img loading="{{ $loading }}" src="{{ $imgdl }}" alt="{{ $alt }}">
-        {{- end }}
+    {{- if $cover }}
+        <img loading="{{ $loading }}" src="{{ $cover.Permalink }}" alt="{{ $alt }}">
     {{- else }}
-        {{- /* For absolute urls and external links, no img processing here */}}
-        <img loading="{{ $loading }}" src="{{ $imgdl }}" alt="{{ $alt }}">
+        {{- /* 重点：使用 relURL 确保路径在所有环境下正确 */ -}}
+        <img loading="{{ $loading }}" src="{{ $coverParam | relURL }}" alt="{{ $alt }}">
     {{- end }}
 
     {{- if $addLink }}
         </a>
-    {{- end -}}
+    {{- end }}
 
-    {{- /*  Display Caption  */}}
     {{- if $.IsSingle }}
         {{ with .Params.cover.caption -}}
             <figcaption>{{ . | markdownify }}</figcaption>
         {{- end }}
     {{- end }}
 </figure>
-{{- end }}{{/* End image */}}
-{{- end -}}{{/* End context */ -}}
+{{- end }}
+{{- end }}
