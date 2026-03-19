@@ -1,18 +1,54 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>我的个人博客</title>
-    <link>http://localhost:1313/</link>
-    <description>Recent content on 我的个人博客</description>
+    <title>NineAnswerer 的个人博客</title>
+    <link>http://localhost:6915/</link>
+    <description>Recent content on NineAnswerer 的个人博客</description>
     <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Mon, 16 Mar 2026 20:21:06 +0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 18 Mar 2026 21:47:44 +0800</lastBuildDate>
+    <atom:link href="http://localhost:6915/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Hugo &#43; GitHub Pages 零基础搭建与进阶全攻略：从踩坑到正式上线</title>
+      <link>http://localhost:6915/posts/hugo%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/</link>
+      <pubDate>Wed, 18 Mar 2026 21:47:44 +0800</pubDate>
+      <guid>http://localhost:6915/posts/hugo%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/</guid>
+      <description>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</description>
+    </item>
+    <item>
+      <title>Git 深度学习与 Hugo 博客搭建：从 404 到正式上线</title>
+      <link>http://localhost:6915/posts/git%E7%9A%84%E4%BD%BF%E7%94%A8%E5%AD%A6%E4%B9%A0/</link>
+      <pubDate>Wed, 18 Mar 2026 21:01:08 +0800</pubDate>
+      <guid>http://localhost:6915/posts/git%E7%9A%84%E4%BD%BF%E7%94%A8%E5%AD%A6%E4%B9%A0/</guid>
+      <description>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</description>
+    </item>
+    <item>
+      <title>关于我</title>
+      <link>http://localhost:6915/about/</link>
+      <pubDate>Wed, 18 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:6915/about/</guid>
+      <description>&lt;h3 id=&#34;-你好我是-nineanswerer&#34;&gt;👋 你好，我是 NineAnswerer&lt;/h3&gt;
+&lt;p&gt;欢迎来到我的数字花园！我是一名专注于计算机科学与人工智能的学习者和实践者。&lt;/p&gt;
+&lt;h4 id=&#34;-技术雷达&#34;&gt;🚀 技术雷达&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;编程语言&lt;/strong&gt;：Python, Java, c++, SQL, Shell&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;大数据生态&lt;/strong&gt;：Hadoop, HBase, Apache Flume&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;人工智能&lt;/strong&gt;：机械学习， 深度学习， NLP&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;游戏工程&lt;/strong&gt;：Minecraft 模组开发（时空绘卷项目）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;-我在做什么&#34;&gt;🛠️ 我在做什么？&lt;/h4&gt;
+&lt;p&gt;目前我正致力于学习深度学习部分。同时，我也是一名硬核的 Minecraft 开发者，喜欢通过代码改变游戏世界。&lt;/p&gt;
+&lt;h4 id=&#34;-联系我&#34;&gt;📬 联系我&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;GitHub&lt;/strong&gt;: &lt;a href=&#34;https://github.com/nineanswerer&#34;&gt;nineanswerer&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Email&lt;/strong&gt;: 你的邮箱地址@example.com&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
     <item>
       <title>Hello World</title>
-      <link>http://localhost:1313/posts/hello-world/</link>
+      <link>http://localhost:6915/posts/hello-world/</link>
       <pubDate>Mon, 16 Mar 2026 20:21:06 +0800</pubDate>
-      <guid>http://localhost:1313/posts/hello-world/</guid>
+      <guid>http://localhost:6915/posts/hello-world/</guid>
       <description></description>
     </item>
   </channel>
