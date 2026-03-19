@@ -38,6 +38,7 @@ pygmentsStyle = "monokai"
     env = "production"        # 生产环境控制
     displayFullPostContent = false
     showShareButtons = true
+    ShowCodeCopyButtons = true # 开启代码块右上角的复制按钮
 
     # --- 首页个人名片模式 (Profile Mode) ---
     [params.homeInfoParams]
