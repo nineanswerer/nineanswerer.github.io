@@ -1,43 +1,56 @@
+# 1. 基础全局配置
 baseURL = 'https://nineanswerer.github.io/'
-languageCode = 'en-us'
-title = '我的个人博客'
+languageCode = 'zh-cn'  # 建议改为 zh-cn，这样搜索和日期显示更符合中文习惯
+title = 'NineAnswerer 的个人博客'
 theme = 'PaperMod'
 
-[params.homeInfoParams]
-    Title = "你好，我是 NineAnswerer 👋"
-    Content = "这是我的个人博客。我关注大数据、AI 和机器人。欢迎交流！"
-        imageUrl = "avatar.png"
-[[params.socialIcons]]
-    name = "github"
-    url = "https://github.com/nineanswerer"
+# 2. 代码高亮配置 (必须放在全局，不能放在 params 里)
+pygmentsCodefences = true
+pygmentsStyle = "monokai" 
 
-[[params.socialIcons]]
-    name = "email"
-    url = "mailto:abcv@123456+789"
+# 3. 输出配置 (开启搜索功能必备)
+[outputs]
+    home = ["HTML", "RSS", "JSON"]
 
+# 4. 菜单配置 (weight 越小越靠左)
 [[menu.main]]
-    name = "关于"
-    url = "/about"
-    weight = 20
+    name = "搜索"
+    url = "/search"
+    weight = 5
 
 [[menu.main]]
     name = "存档"
     url = "/archives"
     weight = 10
 
-[params]
-    ShowToc = true          # 自动显示目录
-    TocOpen = true         # 默认展开目录
-    ShowReadingTime = true # 显示阅读时间
-    ShowPostNavLinks = true # 显示上一篇/下一篇文章
-    assets.disableHLJS = false
-[outputs]
-    home = ["HTML", "RSS", "JSON"] # 必须添加 JSON 以便搜索插件读取数据
-
 [[menu.main]]
-    name = "搜索"
-    url = "/search"
-    weight = 5
+    name = "关于"
+    url = "/about"
+    weight = 20
 
-pygmentsCodefences = true
-pygmentsStyle = "monokai" # 或者 dracula, github-dark
+# 5. 主题参数配置 (所有的开关和自定义信息都在这里)
+[params]
+    # --- 基础功能开关 ---
+    ShowToc = true           # 自动显示目录
+    TocOpen = true           # 默认展开目录
+    ShowReadingTime = true    # 显示阅读时间
+    ShowPostNavLinks = true   # 显示上一篇/下一篇文章
+    env = "production"        # 生产环境控制
+
+    # --- 首页个人名片模式 (Profile Mode) ---
+    [params.homeInfoParams]
+        Title = "你好，我是 NineAnswerer 👋"
+        Content = "Focus on Computer Science | Big Data | AI & Robotics. 欢迎交流！"
+
+    # --- 社交图标配置 ---
+    [[params.socialIcons]]
+        name = "github"
+        url = "https://github.com/nineanswerer"
+
+    [[params.socialIcons]]
+        name = "email"
+        url = "mailto:你的真实邮箱@example.com"
+
+    # --- 资源配置 ---
+    [params.assets]
+        disableHLJS = false # 确保代码高亮生效
