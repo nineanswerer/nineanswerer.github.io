@@ -1,21 +1,17 @@
 /* ================================================================
-   1. 基础变量与背景控制
+   1. 全局：极客灰底色与强力点阵 (不变)
    ================================================================ */
 :root {
-    --theme: #cbd5e1 !important;   /* 工业灰背景 */
-    --content: #ffffff !important; /* 纯白卡片背景 */
+    --theme: #cbd5e1 !important; /* 工业铝灰 */
 }
 
 .dark {
-    --theme: #0f172a !important;   /* 深色背景 */
-    --content: #1e293b !important; /* 深色卡片背景 */
+    --theme: #0f172a !important; /* 深藏青 */
 }
 
-/* 核心修复：只在 body 上设置背景，并确保它不被继承 */
-body {
+html, body {
     background-color: var(--theme) !important;
-    /* 增加 fixed 确保滚动时点阵不动，更有层次感 */
-    background-image: radial-gradient(rgba(0,0,0,0.15) 1.5px, transparent 0) !important;
+    background-image: radial-gradient(rgba(0,0,0,0.2) 2px, transparent 0) !important;
     background-size: 30px 30px !important;
     background-attachment: fixed !important;
 }
@@ -25,66 +21,102 @@ body {
 }
 
 /* ================================================================
-   2. 首页文章列表交错布局 & 穿透修复
+   2. 修复：彻底透明化遮挡层，露出点阵 (不变)
    ================================================================ */
+#top, .wrapper, .main-container {
+    background: transparent !important;
+}
+
+/* ================================================================
+   3. 修复核心问题一：文章详情页(Single)必须是不透明白色背景！
+   ================================================================ */
+/* 针对文章详情页的容器 */
+.single .main, 
+.single .post-single {
+    background-color: #ffffff !important; /* 强制纯白，不透明 */
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+/* 深色模式下的详情页 */
+.dark.single .main, 
+.dark.single .post-single {
+    background-color: #1e293b !important; /* 强制深蓝灰色，不透明 */
+}
+
+/* ================================================================
+   4. 修复核心问题二：首页文章卡片布局重构 (解决撐開问题)
+   ================================================================ */
+/* 首页列表容器透明 */
+.list .main {
+    background: transparent !important;
+}
+
 .post-entry {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row-reverse; /* 默认图片在右 */
     align-items: center;
     justify-content: space-between;
     margin-bottom: 40px;
     padding: 25px;
     border-radius: 16px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     
-    /* 修复关键：给予完全不透明的背景，遮盖底层的点阵 */
-    background: var(--content) !important; 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    /* 修正：卡片本身使用不透明白色，防止点阵干扰 */
+    background: #ffffff !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0,0,0,0.05) !important;
 }
 
+.dark .post-entry {
+    background: #1e293b !important;
+}
+
+/* 奇数行：图片在左 */
 .post-entry:nth-child(odd) {
     flex-direction: row;
 }
 
-.post-entry:hover {
-    transform: translateY(-5px);
-}
-
-/* ================================================================
-   3. 代码块与正文容器修复 (解决图 2 的点阵穿透)
-   ================================================================ */
-/* 确保文章内部的代码块、预格式文本拥有自己的背景，不透出底图 */
-code, pre, .highlight, .post-content {
-    background-image: none !important; /* 强制清除继承的点阵 */
-}
-
-/* 针对 PaperMod 代码块容器的特殊加固 */
-.highlight {
-    background: #282c34; /* 或者是你喜欢的高亮背景色 */
-    border-radius: 8px;
-}
-
-/* ================================================================
-   4. 封面图与移动端适配
-   ================================================================ */
+/* 封面图尺寸控制 */
 .entry-cover {
-    flex: 0 0 45%;
+    flex: 0 0 45%; /* 图片占 45% 宽度 */
     margin: 0 !important;
+    padding: 0;
 }
 
 .entry-cover img {
     border-radius: 12px;
     object-fit: cover;
-    height: 240px;
+    height: 220px;
     width: 100%;
 }
 
+/* 修正：把左侧垂直排布的文字统一放入一个容器，强制水平排版 */
+.post-entry .post-meta {
+    display: flex;
+    flex-direction: row; /* 强制水平 */
+    flex-wrap: wrap;     /* 允许换行 */
+    gap: 15px;           /* 间距 */
+    font-size: 13px;
+    color: #667085;
+    order: 2; /* 确保它在文字区域中排后面 */
+}
+
+/* 深色模式下的文字颜色 */
+.dark .post-entry .post-meta {
+    color: #94a3b8;
+}
+
+/* 移动端排版修正 */
 @media screen and (max-width: 768px) {
     .post-entry, .post-entry:nth-child(odd) {
         flex-direction: column !important;
+        padding: 20px;
     }
     .entry-cover {
         width: 100% !important;
+        flex: none !important;
     }
 }
