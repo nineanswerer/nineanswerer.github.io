@@ -1,105 +1,90 @@
 /* ================================================================
-   1. 全局背景与色调优化 (针对 PaperMod 变量覆盖)
+   1. 基础变量与背景控制
    ================================================================ */
 :root {
-    /* 浅色模式：深一点的工业灰背景 */
-    --theme: #cbd5e1 !important; 
-    --content: #ffffff !important;
-    --entry: #ffffff !important;
+    --theme: #cbd5e1 !important;   /* 工业灰背景 */
+    --content: #ffffff !important; /* 纯白卡片背景 */
 }
 
 .dark {
-    /* 深色模式：极客感藏青色背景 */
-    --theme: #0f172a !important;
-    --content: #1e293b !important;
-    --entry: #1e293b !important;
+    --theme: #0f172a !important;   /* 深色背景 */
+    --content: #1e293b !important; /* 深色卡片背景 */
 }
 
-/* 强制底色与点阵纹理 */
-html, body {
+/* 核心修复：只在 body 上设置背景，并确保它不被继承 */
+body {
     background-color: var(--theme) !important;
-    /* 增强点阵对比度：2px 大小的黑点，间距 30px */
-    background-image: radial-gradient(rgba(0,0,0,0.15) 2px, transparent 0) !important;
+    /* 增加 fixed 确保滚动时点阵不动，更有层次感 */
+    background-image: radial-gradient(rgba(0,0,0,0.15) 1.5px, transparent 0) !important;
     background-size: 30px 30px !important;
     background-attachment: fixed !important;
 }
 
-/* 深色模式下的点阵改为浅色微光 */
 .dark body {
     background-image: radial-gradient(rgba(255,255,255,0.1) 1.5px, transparent 0) !important;
 }
 
-/* 强制让中间容器透明，露出背景点阵 */
-#top, .main, .wrapper, .list, .page, .main-container {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
 /* ================================================================
-   2. 首页文章列表卡片：交错布局 (Zig-Zag)
+   2. 首页文章列表交错布局 & 穿透修复
    ================================================================ */
 .post-entry {
     display: flex;
-    flex-direction: row-reverse; /* 默认图片在右，文字在左 */
+    flex-direction: row-reverse;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 40px;
-    padding: 20px;
-    border-radius: 16px; /* 圆角稍微加大，更有现代感 */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 25px;
+    border-radius: 16px;
+    transition: transform 0.3s ease;
     
-    /* 卡片半透明磨砂效果 */
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    /* 修复关键：给予完全不透明的背景，遮盖底层的点阵 */
+    background: var(--content) !important; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0,0,0,0.05) !important;
 }
 
-.dark .post-entry {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-/* 奇数行：图片在左，文字在右 */
 .post-entry:nth-child(odd) {
     flex-direction: row;
 }
 
-/* 悬停动画：卡片轻微浮起 */
 .post-entry:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 /* ================================================================
-   3. 封面图与响应式调整
+   3. 代码块与正文容器修复 (解决图 2 的点阵穿透)
+   ================================================================ */
+/* 确保文章内部的代码块、预格式文本拥有自己的背景，不透出底图 */
+code, pre, .highlight, .post-content {
+    background-image: none !important; /* 强制清除继承的点阵 */
+}
+
+/* 针对 PaperMod 代码块容器的特殊加固 */
+.highlight {
+    background: #282c34; /* 或者是你喜欢的高亮背景色 */
+    border-radius: 8px;
+}
+
+/* ================================================================
+   4. 封面图与移动端适配
    ================================================================ */
 .entry-cover {
-    flex: 0 0 45%; /* 稍微加宽图片比例 */
+    flex: 0 0 45%;
     margin: 0 !important;
-    padding: 10px;
 }
 
 .entry-cover img {
     border-radius: 12px;
     object-fit: cover;
-    height: 240px; /* 稍微增加高度，大气一点 */
+    height: 240px;
     width: 100%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* 移动端自动回归单列布局 */
 @media screen and (max-width: 768px) {
     .post-entry, .post-entry:nth-child(odd) {
         flex-direction: column !important;
-        padding: 15px;
     }
     .entry-cover {
         width: 100% !important;
-        flex: none !important;
-    }
-    .entry-cover img {
-        height: 200px;
     }
 }
