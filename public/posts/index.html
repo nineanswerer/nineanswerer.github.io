@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto" data-theme="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=10842&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -9,17 +9,17 @@
 <meta name="keywords" content="">
 <meta name="description" content="Posts - NineAnswerer 的个人博客">
 <meta name="author" content="NineAnswerer">
-<link rel="canonical" href="http://localhost:10842/posts/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.20326a4a28d51b1e82adf72f32e130afcdd65c66ce789d039d5df067cb21ff89.css" integrity="sha256-IDJqSijVGx6CrfcvMuEwr83WXGbOeJ0DnV3wZ8sh/4k=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:10842/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:10842/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:10842/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:10842/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:10842/safari-pinned-tab.svg">
+<link rel="canonical" href="http://localhost:1313/posts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.7800769118e9602aaba718f9fd6398f1a8b99c10ad84301aa06cad83ec8c48cd.css" integrity="sha256-eAB2kRjpYCqrpxj5/WOY8ai5nBCthDAaoGytg&#43;yMSM0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="http://localhost:10842/posts/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="http://localhost:10842/posts/">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/posts/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/">
 <noscript>
     <style>
         #theme-toggle,
@@ -71,7 +71,7 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="http://localhost:10842/posts/">
+</script><meta property="og:url" content="http://localhost:1313/posts/">
   <meta property="og:site_name" content="NineAnswerer 的个人博客">
   <meta property="og:title" content="Posts">
   <meta property="og:description" content="NineAnswerer 的技术博客 - 专注于大数据、AI 与机器学习实战分享">
@@ -92,7 +92,7 @@
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "http://localhost:10842/posts/"
+      "item": "http://localhost:1313/posts/"
     }
   ]
 }
@@ -102,7 +102,7 @@
     <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:10842/" accesskey="h" title="NineAnswerer 的个人博客 (Alt + H)">NineAnswerer 的个人博客</a>
+            <a href="http://localhost:1313/" accesskey="h" title="NineAnswerer 的个人博客 (Alt + H)">NineAnswerer 的个人博客</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -128,17 +128,17 @@
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:10842/search" title="搜索">
+                <a href="http://localhost:1313/search" title="搜索">
                     <span>搜索</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:10842/archives" title="存档">
+                <a href="http://localhost:1313/archives" title="存档">
                     <span>存档</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:10842/about" title="关于">
+                <a href="http://localhost:1313/about" title="关于">
                     <span>关于</span>
                 </a>
             </li>
@@ -153,64 +153,95 @@
 </header>
 
 <article class="post-entry">
+<figure class="entry-cover"><img loading="lazy" src="/images/covers/15.jpg" alt="Featured Image">
+</figure>
+  <div class="entry-item-wrapper">
+    <header class="entry-header">
+      <h2 class="entry-hint-parent">深度学习顺序
+      </h2>
+    </header>
+    <div class="entry-content">
+      <p>这里是飞桨教程： 的复现顺序，仅供个人使用，如果你有想法，可以看看，参考，但我可不保证你能完全复现。
+2.3数据处理 这里使用的是飞桨自带的库，官方教程上面栏目中可以安装
+2.3.1导入和划分 这部分代码
+# 声明数据集文件位置 datafile = &#39;./work/mnist.json.gz&#39; print(&#39;loading mnist dataset from {} ......&#39;.format(datafile)) # 加载json数据文件 data = json.load(gzip.open(datafile)) print(&#39;mnist dataset load done&#39;) # 读取到的数据区分训练集，验证集，测试集 train_set, val_set, eval_set = data # 观察训练集数据 imgs, labels = train_set[0], train_set[1] print(&#34;训练数据集数量: &#34;, len(imgs)) # 观察验证集数量 imgs, labels = val_set[0], val_set[1] print(&#34;验证数据集数量: &#34;, len(imgs)) # 观察测试集数量 imgs, labels = val= eval_set[0], eval_set[1] print(&#34;测试数据集数量: &#34;, len(imgs)) print(len(imgs[0])) 只进行了数据的从mnist.json.gz进行的导入和划分成为训练，验证，测试集
+2.3.2训练样本乱序、生成批次数据 两部分，乱序和批次数据
+1.乱序：按照顺序编号建立集合，接着乱序读取该集合。 2.批次数据：定义每一批次多少，自动给出多少批次，后续训练。 官网代码：
+imgs, labels = train_set[0], train_set[1] print(&#34;训练数据集数量: &#34;, len(imgs)) # 获得数据集长度 imgs_length = len(imgs) # 定义数据集每个数据的序号，根据序号读取数据 index_list = list(range(imgs_length)) # 读入数据时用到的批次大小 BATCHSIZE = 100 # 随机打乱训练数据的索引序号 random.shuffle(index_list) # 定义数据生成器，返回批次数据 def data_generator(): imgs_list = [] labels_list = [] for i in index_list: # 将数据处理成希望的类型 img = np.array(imgs[i]).astype(&#39;float32&#39;) label = np.array(labels[i]).astype(&#39;float32&#39;) imgs_list.append(img) labels_list.append(label) if len(imgs_list) == BATCHSIZE: # 获得一个batchsize的数据，并返回 yield np.array(imgs_list), np.array(labels_list) # 清空数据读取列表 imgs_list = [] labels_list = [] # 如果剩余数据的数目小于BATCHSIZE， # 则剩余数据一起构成一个大小为len(imgs_list)的mini-batch if len(imgs_list) &gt; 0: yield np.array(imgs_list), np.array(labels_list) return data_generator # 声明数据读取函数，从训练集中读取数据 train_loader = data_generator # 以迭代的形式读取数据 for batch_id, data in enumerate(train_loader()): image_data, label_data = data if batch_id == 0: # 打印数据shape和类型 print(&#34;打印第一个batch数据的维度:&#34;) print(&#34;图像维度: {}, 标签维度: {}&#34;.format(image_data.shape, label_data.shape)) break 2.3.3 校验数据有效性 两种：机器校验和人工校验
+...</p>
+    </div>
+    <footer class="entry-footer"><span title='2026-03-25 11:01:32 +0800 CST'>March 25, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>605 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
+  </div>
+  <a class="entry-link" aria-label="post link to 深度学习顺序" href="http://localhost:1313/posts/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A1%BA%E5%BA%8F/"></a>
+</article>
+
+<article class="post-entry">
 <figure class="entry-cover"><img loading="lazy" src="/images/covers/18.jpg" alt="Featured Image">
 </figure>
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">测试文章1
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p></p>
+  <div class="entry-item-wrapper">
+    <header class="entry-header">
+      <h2 class="entry-hint-parent">测试文章1
+      </h2>
+    </header>
+    <div class="entry-content">
+      <p></p>
+    </div>
+    <footer class="entry-footer"><span title='2026-03-19 14:45:49 +0800 CST'>March 19, 2026</span>&nbsp;·&nbsp;<span>0 min</span>&nbsp;·&nbsp;<span>0 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
   </div>
-  <footer class="entry-footer"><span title='2026-03-19 14:45:49 +0800 CST'>March 19, 2026</span>&nbsp;·&nbsp;<span>0 min</span>&nbsp;·&nbsp;<span>0 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
-  <a class="entry-link" aria-label="post link to 测试文章1" href="http://localhost:10842/posts/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A01/"></a>
+  <a class="entry-link" aria-label="post link to 测试文章1" href="http://localhost:1313/posts/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A01/"></a>
 </article>
 
 <article class="post-entry">
 <figure class="entry-cover"><img loading="lazy" src="/images/cover.png" alt="Hugo 配置教程封面图">
 </figure>
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Hugo &#43; GitHub Pages 零基础搭建与进阶全攻略：从踩坑到正式上线
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</p>
+  <div class="entry-item-wrapper">
+    <header class="entry-header">
+      <h2 class="entry-hint-parent">Hugo &#43; GitHub Pages 零基础搭建与进阶全攻略：从踩坑到正式上线
+      </h2>
+    </header>
+    <div class="entry-content">
+      <p>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</p>
+    </div>
+    <footer class="entry-footer"><span title='2026-03-18 21:47:44 +0800 CST'>March 18, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>299 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
   </div>
-  <footer class="entry-footer"><span title='2026-03-18 21:47:44 +0800 CST'>March 18, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>298 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
-  <a class="entry-link" aria-label="post link to Hugo &#43; GitHub Pages 零基础搭建与进阶全攻略：从踩坑到正式上线" href="http://localhost:10842/posts/hugo%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/"></a>
+  <a class="entry-link" aria-label="post link to Hugo &#43; GitHub Pages 零基础搭建与进阶全攻略：从踩坑到正式上线" href="http://localhost:1313/posts/hugo%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/"></a>
 </article>
 
 <article class="post-entry">
 <figure class="entry-cover"><img loading="lazy" src="/images/covers/11.jpg" alt="Git 深度学习与 Hugo 博客搭建：从 404 到正式上线">
 </figure>
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Git 深度学习与 Hugo 博客搭建：从 404 到正式上线
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</p>
+  <div class="entry-item-wrapper">
+    <header class="entry-header">
+      <h2 class="entry-hint-parent">Git 深度学习与 Hugo 博客搭建：从 404 到正式上线
+      </h2>
+    </header>
+    <div class="entry-content">
+      <p>记录从零搭建个人博客的全过程，涵盖 Hugo 环境配置、GitHub Actions 自动化部署及 Git 核心工作流解析。</p>
+    </div>
+    <footer class="entry-footer"><span title='2026-03-18 21:01:08 +0800 CST'>March 18, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>191 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
   </div>
-  <footer class="entry-footer"><span title='2026-03-18 21:01:08 +0800 CST'>March 18, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>192 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
-  <a class="entry-link" aria-label="post link to Git 深度学习与 Hugo 博客搭建：从 404 到正式上线" href="http://localhost:10842/posts/git%E7%9A%84%E4%BD%BF%E7%94%A8%E5%AD%A6%E4%B9%A0/"></a>
+  <a class="entry-link" aria-label="post link to Git 深度学习与 Hugo 博客搭建：从 404 到正式上线" href="http://localhost:1313/posts/git%E7%9A%84%E4%BD%BF%E7%94%A8%E5%AD%A6%E4%B9%A0/"></a>
 </article>
 
 <article class="post-entry">
 <figure class="entry-cover"><img loading="lazy" src="/images/covers/12.jpg" alt="Hello World">
 </figure>
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Hello World
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p></p>
+  <div class="entry-item-wrapper">
+    <header class="entry-header">
+      <h2 class="entry-hint-parent">Hello World
+      </h2>
+    </header>
+    <div class="entry-content">
+      <p></p>
+    </div>
+    <footer class="entry-footer"><span title='2026-03-16 20:21:06 +0800 CST'>March 16, 2026</span>&nbsp;·&nbsp;<span>0 min</span>&nbsp;·&nbsp;<span>0 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
   </div>
-  <footer class="entry-footer"><span title='2026-03-16 20:21:06 +0800 CST'>March 16, 2026</span>&nbsp;·&nbsp;<span>0 min</span>&nbsp;·&nbsp;<span>0 words</span>&nbsp;·&nbsp;<span>NineAnswerer</span></footer>
-  <a class="entry-link" aria-label="post link to Hello World" href="http://localhost:10842/posts/hello-world/"></a>
+  <a class="entry-link" aria-label="post link to Hello World" href="http://localhost:1313/posts/hello-world/"></a>
 </article>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2026 <a href="http://localhost:10842/">NineAnswerer 的个人博客</a></span> · 
+        <span>&copy; 2026 <a href="http://localhost:1313/">NineAnswerer 的个人博客</a></span> · 
 
     <span>
         Powered by

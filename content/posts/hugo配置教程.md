@@ -46,7 +46,7 @@ cd myblog
 以 PaperMod 为例，建议使用 `git submodule`。
 ```bash
 git init
-git submodule add [https://github.com/adityatelange/hugo-PaperMod](https://github.com/adityatelange/hugo-PaperMod) themes/PaperMod
+git submodule add https://github.com/adityatelange/hugo-PaperMod themes/PaperMod
 ```
 * **为什么？** 这样你的主题就是一个独立的链接，以后只需一行命令就能更新主题，且不会弄乱你自己的代码。
 
@@ -57,7 +57,7 @@ git submodule add [https://github.com/adityatelange/hugo-PaperMod](https://githu
 打开根目录的 `hugo.toml`，这是最核心的步骤。请参考以下标准配置：
 
 ```toml
-baseURL = '[https://nineanswerer.github.io/](https://nineanswerer.github.io/)' # 🚨 结尾必须带斜杠！
+baseURL = 'https://nineanswerer.github.io/' # 🚨 结尾必须带斜杠！
 languageCode = 'zh-cn'
 title = 'NineAnswerer 的技术笔记'
 theme = 'PaperMod'
@@ -67,13 +67,14 @@ theme = 'PaperMod'
     ShowToc = true          # 自动生成目录
     TocOpen = true         # 默认展开
     # 首页个人信息
-    homeInfoParams:
+    [params.homeInfoParams]
         Title = "你好，我是 NineAnswerer 👋"
         Content = "Focus on Computer Science | Big Data | AI"
+
     # 社交图标
-    socialIcons:
-        - name: "github"
-          url: "[https://github.com/nineanswerer](https://github.com/nineanswerer)"
+    [[params.socialIcons]]
+        name = "github"
+        url = "https://github.com/nineanswerer"
 
 [outputs]
     home = ["HTML", "RSS", "JSON"] # 开启搜索功能必须加 JSON

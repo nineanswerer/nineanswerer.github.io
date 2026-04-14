@@ -93,15 +93,43 @@ html, body {
     width: 100%;
 }
 
-/* 修正：把左侧垂直排布的文字统一放入一个容器，强制水平排版 */
-.post-entry .post-meta {
+/* 修正：把左侧的所有文字通过 wrapper 包裹，占据剩余空间 */
+.entry-item-wrapper {
+    flex: 1;
     display: flex;
-    flex-direction: row; /* 强制水平 */
-    flex-wrap: wrap;     /* 允许换行 */
-    gap: 15px;           /* 间距 */
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; /* 防止长内容撑破容器 */
+}
+
+/* 间距控制 */
+.entry-item-wrapper .entry-header {
+    margin-bottom: 8px;
+}
+
+.entry-item-wrapper .entry-content {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* Meta 信息水平排列 */
+.post-meta {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
     font-size: 13px;
-    color: #667085;
-    order: 2; /* 确保它在文字区域中排后面 */
+    color: #6b7280;
+}
+
+.dark .post-meta {
+    color: #9ca3af;
+}
+
+.dark .entry-item-wrapper .entry-content {
+    color: #cbd5e1;
 }
 
 /* 深色模式下的文字颜色 */

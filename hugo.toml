@@ -58,7 +58,7 @@ pygmentsStyle = "monokai"
 
     [[params.socialIcons]]
         name = "email"
-        url = "mailto:你的真实邮箱@example.com"
+        url = "mailto:YOUR_EMAIL@example.com"
 
     # --- 资源配置 ---
     [params.assets]
