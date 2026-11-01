@@ -1,0 +1,61 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatDate } from '../utils';
+
+interface Heading { depth: number; slug: string; text: string; }
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  tags?: string[];
+  headings?: Heading[];
+  eyebrow?: string;
+}
+const { title, description, date, tags = [], headings = [], eyebrow = 'FIELD NOTES / 实践笔记' } = Astro.props;
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+<BaseLayout title={title} description={description}>
+  <div class="shell article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/writing/">← 返回文章</a>
+      <span class="eyebrow">{eyebrow}</span>
+      <h1>{title}</h1>
+      <p class="article-deck">{description}</p>
+      <div class="article-byline">
+        <span>九术 / NineAnswerer</span>
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        {tags.map((tag) => <span class="article-tag">{tag}</span>)}
+      </div>
+    </header>
+    <div class="article-grid">
+      {toc.length > 0 && (
+        <aside class="toc" aria-label="文章目录">
+          <span class="eyebrow">ON THIS PAGE</span>
+          <nav>{toc.map((heading) => <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>)}</nav>
+        </aside>
+      )}
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+<script>
+  document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
+    const button = document.createElement('button');
+    button.className = 'copy-code';
+    button.type = 'button';
+    button.textContent = '复制';
+    button.setAttribute('aria-label', '复制代码');
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '');
+        button.textContent = '已复制';
+        setTimeout(() => { button.textContent = '复制'; }, 1600);
+      } catch {
+        button.textContent = '复制失败';
+      }
+    });
+    pre.appendChild(button);
+  });
+</script>

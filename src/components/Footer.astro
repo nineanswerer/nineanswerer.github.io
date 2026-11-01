@@ -1,0 +1,20 @@
+---
+import { site } from '../config';
+---
+<footer class="site-footer">
+  <div class="shell footer-main">
+    <div>
+      <span class="eyebrow">KEEP THE EVIDENCE</span>
+      <p class="footer-statement">不只展示结果，<br />也记录问题如何被解决。</p>
+    </div>
+    <div class="footer-links">
+      <a href={site.github} target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
+      <a href="/rss.xml">RSS <span>↗</span></a>
+      <a href="/about/">关于 <span>↗</span></a>
+    </div>
+  </div>
+  <div class="shell footer-base">
+    <span>© {new Date().getFullYear()} 九术 / NineAnswerer</span>
+    <span>Astro · GitHub Pages</span>
+  </div>
+</footer>

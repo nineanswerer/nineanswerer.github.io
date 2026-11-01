@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config';
+---
+<BaseLayout title="关于" description="关于九术 / NineAnswerer：技术方向、项目方法与公开联系方式。">
+  <div class="shell">
+    <section class="about-intro">
+      <div>
+        <span class="eyebrow">ABOUT / 九术</span>
+        <h1>保持好奇，<br />也把作品做完。</h1>
+        <p class="about-lede">我是九术，也使用 NineAnswerer 这个 ID。大数据专业背景，目前通过个人项目持续练习桌面应用、自动化工具与数据处理。比起罗列掌握多少名词，我更在意能否把问题讲清楚，把软件交到真实场景里验证。</p>
+        <p class="about-lede">这个网站是我的公开工程档案：项目页说明结果与边界，文章页保留可复用的过程。它也会随着项目证据的增加持续修订。</p>
+      </div>
+      <aside class="about-card">
+        <div class="about-monogram" aria-hidden="true">九</div>
+        <h2>九术</h2>
+        <p>NINEANSWERER / DEVELOPER</p>
+        <p>个人项目 · 技术写作 · 持续学习</p>
+        <a href={site.github} target="_blank" rel="noreferrer">GitHub @nineanswerer ↗</a>
+      </aside>
+    </section>
+
+    <section class="about-grid">
+      <div><span class="eyebrow">TOOLBOX</span><h2>工具与能力</h2></div>
+      <div class="about-grid-content">
+        <p>下面区分“已经在项目中使用”和“正在学习整理”，不把课程接触等同于生产经验。</p>
+        <div class="skill-table">
+          <div class="skill-row"><strong>桌面与应用</strong><span>Rust、Tauri 2、React、TypeScript、Three.js；用于 StorageScope 的扫描、可视化与交互实现。</span></div>
+          <div class="skill-row"><strong>Python 与自动化</strong><span>Python、Playwright；用于本地化工作流、浏览器自动化、结果判定与诊断报告。</span></div>
+          <div class="skill-row"><strong>网站与交付</strong><span>Astro、Git、GitHub Actions、GitHub Pages；用于本站的静态内容管理、界面测试与自动部署。</span></div>
+          <div class="skill-row"><strong>持续学习</strong><span>大数据生态、机器学习与深度学习；通过课程复现和数据处理笔记夯实基础。</span></div>
+        </div>
+        <p class="about-disclaimer">具体适用范围以各项目 README、源代码和案例说明为准。</p>
+      </div>
+    </section>
+
+    <section class="about-grid">
+      <div><span class="eyebrow">APPROACH</span><h2>我如何做项目</h2></div>
+      <div class="about-grid-content">
+        <div class="skill-table">
+          <div class="skill-row"><strong>先确认问题</strong><span>明确谁在什么场景下遇到困难，避免把“能写出来”误认为“值得做”。</span></div>
+          <div class="skill-row"><strong>再建立反馈</strong><span>优先打通扫描、操作、验证的完整闭环，用真实数据和异常路径检查设计。</span></div>
+          <div class="skill-row"><strong>最后留下证据</strong><span>保留源码、测试、发布包和复盘；不能复现的数字，不写成结论。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-grid">
+      <div><span class="eyebrow">CONTACT</span><h2>公开联系</h2></div>
+      <div class="about-grid-content"><p>可以从 GitHub 查看完整代码与仓库动态，也可以通过具体项目的 Issue 反馈问题。与项目相关的讨论，请尽量附上环境、复现步骤和预期结果。</p><a class="button" href={site.github} target="_blank" rel="noreferrer">前往 GitHub <span>↗</span></a></div>
+    </section>
+  </div>
+</BaseLayout>

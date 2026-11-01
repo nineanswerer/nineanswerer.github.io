@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout title="项目档案" description="九术的项目档案：StorageScope 桌面磁盘分析、Minecraft 本地化与资源工具、浏览器自动化。">
+  <div class="shell">
+    <header class="page-header">
+      <div><span class="eyebrow">PROJECT INDEX</span><h1>项目档案</h1></div>
+      <div class="page-intro"><p>不按框架分类，而按问题组织。每个项目都保留技术栈、个人职责、验证结果和来源说明。</p><span class="eyebrow">{projects.length} PROJECTS / CONTINUOUSLY UPDATED</span></div>
+    </header>
+    <section class="page-content" aria-label="全部项目">
+      <div class="page-meta"><span>名称 / 简介 / 技术栈</span><span>按代表性与近期工作排序</span></div>
+      <div class="project-list">{projects.map((project, index) => <ProjectCard project={project} index={index} />)}</div>
+    </section>
+  </div>
+</BaseLayout>
