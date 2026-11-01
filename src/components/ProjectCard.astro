@@ -1,21 +1,21 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-interface Props { project: CollectionEntry<'projects'>; index: number; }
-const { project, index } = Astro.props;
+import DoodleIcon from './DoodleIcon.astro';
+interface Props { project: CollectionEntry<'projects'>; index: number; compact?: boolean; }
+const { project, index, compact = false } = Astro.props;
 const { data } = project;
+const icon = data.featured ? 'tree' : project.id === 'minecraft-resource-extractor' ? 'folder' : 'tool';
 ---
-<article class="project-row">
-  <a class="project-row-link" href={`/projects/${project.id}/`} aria-label={`查看 ${data.title} 项目案例`}>
-    <span class="project-index">{String(index + 1).padStart(2, '0')}</span>
+<article class:list={['project-row', { compact }]}>
+  <a class="project-row-link" href={`/projects/${project.id}/`} aria-label={`查看 ${data.title} 项目复盘`}>
+    <span class="project-symbol"><DoodleIcon name={icon} size={34} /><span>{String(index + 1).padStart(2, '0')}</span></span>
     <div class="project-row-main">
-      <div class="project-row-title">
-        <h3>{data.title}</h3>
-        <span class="status-label">{data.status}</span>
-      </div>
+      <div class="project-row-title"><h3>{data.title}</h3><span class="status-label">{data.status}</span></div>
       <p class="project-tagline">{data.tagline}</p>
-      <p class="project-description">{data.description}</p>
+      {!compact && <p class="project-description">{data.description}</p>}
       <ul class="tag-list" aria-label="技术栈">{data.stack.map((item) => <li>{item}</li>)}</ul>
     </div>
+    <span class="project-role">{data.role}</span>
     <span class="round-arrow" aria-hidden="true">↗</span>
   </a>
 </article>

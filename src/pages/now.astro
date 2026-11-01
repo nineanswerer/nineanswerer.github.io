@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatDate } from '../utils';
+const entries = await getCollection('now');
+const current = entries[0];
+const { Content } = await render(current);
+---
+<BaseLayout title="现在" description={current.data.description}>
+  <div class="shell">
+    <header class="page-header">
+      <span class="eyebrow">NOW / 这一页只写当下</span>
+      <h1>最近，桌子上有这些。</h1>
+      <p>不是长期目标清单，也不承诺固定更新频率。只记录当前确实在做和准备补全的事情。</p>
+    </header>
+    <div class="now-layout">
+      <aside class="now-aside">
+        <span class="now-stamp" aria-hidden="true">今</span>
+        <p>本页更新时间<br /><time datetime={current.data.updated.toISOString()}>{formatDate(current.data.updated)}</time></p>
+        <p>有真实变化时，<br />再回来划掉或补上。</p>
+      </aside>
+      <article class="prose now-prose"><Content /></article>
+    </div>
+  </div>
+</BaseLayout>

@@ -2,6 +2,7 @@
 title: "30 万文件目录的 3D 可视化：从节点爆炸到可读结构"
 description: "StorageScope 的三维目录树为什么不做成文件总数的镜像，以及节点预算、LOD、标签避让和拾取如何共同服务结构阅读。"
 date: 2026-11-01
+project: storagescope
 tags: ["Three.js", "可视化", "StorageScope"]
 ---
 

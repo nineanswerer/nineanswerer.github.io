@@ -1,0 +1,25 @@
+---
+import { site } from '../config';
+interface Props { target: string; }
+const { target } = Astro.props;
+const canonical = new URL(target, site.url).href;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>页面已移动 · 九术的工作台</title>
+    <style>
+      body { display: grid; place-items: center; min-height: 90vh; margin: 0; background: #f5f0e6; color: #25231f; font-family: system-ui, sans-serif; line-height: 1.8; }
+      main { max-width: 520px; margin: 24px; padding: 32px; border: 1px solid #a99e8d; background: #fffdf7; }
+      h1 { font-family: KaiTi, serif; font-weight: 400; }
+      a { color: #355e9e; text-underline-offset: 4px; }
+    </style>
+  </head>
+  <body><main><h1>这张纸条换了位置。</h1><p>旧链接已经保留。如果没有自动前往，请打开下面的新地址：</p><p><a href={target}>{canonical}</a></p></main></body>
+</html>

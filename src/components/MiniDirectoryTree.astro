@@ -1,0 +1,45 @@
+---
+import DoodleIcon from './DoodleIcon.astro';
+---
+<div class="mini-tree" data-mini-tree>
+  <div class="cell-label"><span>01 / 正在制作</span><DoodleIcon name="tree" size={21} /></div>
+  <svg class="mini-tree-drawing" viewBox="0 0 230 116" role="img" aria-labelledby="mini-tree-title mini-tree-desc">
+    <title id="mini-tree-title">StorageScope 的小目录树</title>
+    <desc id="mini-tree-desc">根目录连接下载和文档，展开后显示其中的子目录。此图为结构示意。</desc>
+    <g class="tree-first">
+      <path d="M115 22V39M115 39 55 56M115 39l60 17" />
+      <path class="tree-node root-node" d="m105 11 20-1 1 13-20 1Z" />
+      <text x="115" y="8">磁盘</text>
+      <path class="tree-node" d="m42 54 24-1 1 14-24 1Z" />
+      <text x="54" y="82">下载</text>
+      <path class="tree-node" d="m162 54 24 1-1 14-24-1Z" />
+      <text x="174" y="82">文档</text>
+    </g>
+    <g class="tree-second">
+      <path d="M54 69v11m0 0L28 92m26-12 25 12M174 69v11m0 0-26 12m26-12 27 12" />
+      <path class="tree-node child-node" d="m20 91 15-1 1 12-15 1Z" />
+      <path class="tree-node child-node" d="m72 91 15 1-1 12-15-1Z" />
+      <path class="tree-node child-node" d="m140 92 15-1 1 12-15 1Z" />
+      <path class="tree-node child-node" d="m194 92 15 1-1 12-15-1Z" />
+      <text x="28" y="114">安装包</text><text x="79" y="114">截图</text>
+      <text x="147" y="114">笔记</text><text x="201" y="114">草稿</text>
+    </g>
+  </svg>
+  <div class="mini-tree-actions">
+    <button type="button" data-tree-toggle aria-expanded="false" aria-label="展开目录树第二层"><span data-tree-label>展开两层</span><span aria-hidden="true">＋</span></button>
+    <a href="/projects/storagescope/" aria-label="查看 StorageScope 项目">StorageScope <span aria-hidden="true">↗</span></a>
+  </div>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mini-tree]').forEach((tree) => {
+    const button = tree.querySelector<HTMLButtonElement>('[data-tree-toggle]');
+    const label = tree.querySelector<HTMLElement>('[data-tree-label]');
+    button?.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(expanded));
+      button.setAttribute('aria-label', expanded ? '收起目录树第二层' : '展开目录树第二层');
+      tree.dataset.expanded = String(expanded);
+      if (label) label.textContent = expanded ? '收起一层' : '展开两层';
+    });
+  });
+</script>

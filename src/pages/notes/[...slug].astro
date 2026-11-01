@@ -1,0 +1,16 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes', ({ data }) => !data.draft);
+  return notes.map((note) => ({ params: { slug: note.id }, props: { note } }));
+}
+const { note } = Astro.props;
+const { Content, headings } = await render(note);
+const projects = note.data.project ? await getCollection('projects') : [];
+const relatedProject = projects.find((project) => project.id === note.data.project);
+---
+<ArticleLayout title={note.data.title} description={note.data.description} date={note.data.date} updated={note.data.updated} tags={note.data.tags} headings={headings} kind="碎片" eyebrow="一张开发便签" relatedProject={relatedProject}>
+  <Content />
+</ArticleLayout>
