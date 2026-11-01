@@ -1,12 +1,13 @@
 ---
 title: "StorageScope"
 tagline: "让磁盘空间从一串数字，变成可以探索的结构。"
-description: "独立设计并实现 Windows 桌面磁盘分析工具，打通目录扫描、空间可视化、快照差异与安全清理，并用 30 万级真实目录验证大场景交互。"
+description: "主导产品定义与交互验收的 Windows 桌面磁盘分析工具，打通目录扫描、空间可视化、快照差异与安全清理，并用 30 万级真实目录验证大场景交互。"
 date: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-01
 featured: true
 status: "v0.1.0 已发布"
-role: "独立设计 / 开发 / 验证"
+role: "产品定义 / 交互决策 / 实景验证"
+contribution: "九术提出需求、确定核心工作流与视觉方向，持续否决不解决实际问题的设计，并在真实桌面窗口中验收交互；AI 协作完成代码实现、调试与设计迭代。项目不表述为全部代码均由个人独立手写。"
 stack: ["Rust", "Tauri 2", "React", "TypeScript", "Three.js"]
 repo: "https://github.com/nineanswerer/StorageScope"
 release: "https://github.com/nineanswerer/StorageScope/releases/tag/v0.1.0"
@@ -71,4 +72,6 @@ Windows 能显示磁盘余量，却很难直接回答三个更具体的问题：
 
 ## 贡献与下一步
 
-我承担项目的独立设计、开发与当前验证。后续重点不是继续堆功能，而是补公开 README、CI、可复现性能基准和前端自动化测试，让构建、验证和对比都能被第三方重复。
+我主导产品定义、交互决策与真实场景验收，AI 协作完成代码实现、调试和设计迭代。后续重点不是继续堆功能，而是补公开 README、CI、可复现性能基准和前端自动化测试，让构建、验证和对比都能被第三方重复。
+
+[阅读完整项目复盘](/writing/storagescope-case-study/)，了解从需求到发布的过程。

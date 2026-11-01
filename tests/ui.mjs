@@ -91,8 +91,9 @@ try {
   });
 
   const routes = [
-    '/', '/writing/', '/writing/storagescope-3d-tree/', '/notes/visible-node-budget/',
-    '/projects/', '/projects/storagescope/', '/projects/minecraft-resource-extractor/',
+    '/', '/writing/', '/writing/storagescope-case-study/', '/writing/storagescope-3d-tree/',
+    '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
+    '/projects/', '/projects/storagescope/', '/projects/personal-workshop/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
   ];
   for (const width of [1440, 768, 390]) {
@@ -105,6 +106,13 @@ try {
       assert.ok(dimensions.scroll <= dimensions.client + 1, `${route} overflows horizontally at ${width}px: ${dimensions.scroll} > ${dimensions.client}`);
       const brokenImages = await page.locator('img').evaluateAll((images) => images.filter((image) => !image.complete || image.naturalWidth === 0).map((image) => image.getAttribute('src')));
       assert.deepEqual(brokenImages, [], `${route} has broken images`);
+      const distortedImages = await page.locator('img').evaluateAll((images) => images.flatMap((image) => {
+        if (!image.offsetWidth || !image.offsetHeight || !image.naturalWidth || !image.naturalHeight) return [];
+        const displayedRatio = image.offsetWidth / image.offsetHeight;
+        const naturalRatio = image.naturalWidth / image.naturalHeight;
+        return Math.abs(displayedRatio - naturalRatio) / naturalRatio > 0.01 ? [`${image.getAttribute('src')}: displayed ${image.offsetWidth}×${image.offsetHeight}, natural ${image.naturalWidth}×${image.naturalHeight}`] : [];
+      }));
+      assert.deepEqual(distortedImages, [], `${route} has stretched images at ${width}px`);
       const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
       assert.equal(canonical, `https://nineanswerer.github.io${route}`, `${route} has the wrong canonical`);
       checks.push(`${route} @ ${width}px`);
@@ -130,13 +138,13 @@ try {
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
   await page.locator('[data-blog-filter="长文"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 4, 'Long-form filter should show four posts');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 5, 'Long-form filter should show five posts');
   await page.locator('[data-blog-filter="碎片"]').click();
   assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Note filter should show six notes');
   await page.locator('[data-blog-filter="全部"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 10, 'All filter should restore ten entries');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 11, 'All filter should restore eleven entries');
   await page.screenshot({ path: path.join(output, 'writing-1440.png'), fullPage: true });
-  checks.push('blog filters: 4 long-form, 6 notes, 10 total');
+  checks.push('blog filters: 5 long-form, 6 notes, 11 total');
 
   const oldTheme = await page.locator('html').getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').click();
@@ -184,6 +192,10 @@ try {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'project-1440.png'), fullPage: true });
+  await page.goto(`${base}/projects/personal-workshop/`, { waitUntil: 'networkidle' });
+  await page.screenshot({ path: path.join(output, 'website-project-1440.png'), fullPage: true });
+  await page.goto(`${base}/writing/storagescope-case-study/`, { waitUntil: 'networkidle' });
+  await page.screenshot({ path: path.join(output, 'storagescope-case-study-1440.png'), fullPage: true });
   await page.goto(`${base}/now/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'now-1440.png'), fullPage: true });
 
@@ -194,7 +206,7 @@ try {
   assert.equal(await page.locator('.copy-code').first().textContent(), '已复制');
   await page.setViewportSize({ width: 768, height: 900 });
   await page.screenshot({ path: path.join(output, 'article-768.png'), fullPage: true });
-  checks.push('project desktop, now desktop, article TOC and clipboard');
+  checks.push('project and case-study desktop, now desktop, article TOC and clipboard');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
@@ -206,11 +218,11 @@ try {
   const rssText = await rss.text();
   assert.ok(rssText.includes('StorageScope'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
-  assert.ok((rssText.match(/<item>/g) ?? []).length === 10, 'RSS should contain four long posts and six notes');
+  assert.ok((rssText.match(/<item>/g) ?? []).length === 11, 'RSS should contain five long posts and six notes');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
   assert.equal(sitemap.status(), 200);
   assert.ok((await sitemap.text()).includes('/now/'));
-  checks.push('RSS with 10 writing items and sitemap');
+  checks.push('RSS with 11 writing items and sitemap');
 
   const legacyRoutes = [
     ['/posts/hugo配置教程/', '/writing/github-pages-troubleshooting/'],
@@ -235,7 +247,7 @@ try {
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
-  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 10, 'No-JS blog should show all entries');
+  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 11, 'No-JS blog should show all entries');
   assert.equal(await noJsPage.locator('[data-blog-filters]').isVisible(), false, 'Filters should stay hidden without JS');
   await noJsPage.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.equal(await noJsPage.locator('h1').isVisible(), true);

@@ -7,7 +7,7 @@ status: "可用版本"
 role: "核心设计与开发"
 stack: ["Python", "Playwright", "Browser Automation", "Reporting"]
 repo: "https://github.com/nineanswerer/tenxunyun-publish"
-order: 3
+order: 4
 metrics: []
 ---
 

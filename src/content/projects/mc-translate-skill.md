@@ -7,7 +7,7 @@ status: "持续开发"
 role: "核心设计与开发"
 stack: ["Python 3.11+", "Adapter", "Cache", "Workflow"]
 repo: "https://github.com/nineanswerer/mc-Translate-skill"
-order: 2
+order: 3
 metrics: []
 ---
 

@@ -7,7 +7,7 @@ status: "开源派生项目"
 role: "汉化 / 功能增强"
 stack: ["Python", "Minecraft", "Resource Tools"]
 repo: "https://github.com/nineanswerer/Minecraft-Resource-Extractor"
-order: 4
+order: 5
 contribution: "本项目基于 JKerboeuf/Minecraft-Resource-Extractor。个人工作集中在中文本地化与功能增强，不将上游项目计为独立原创。"
 metrics: []
 ---
