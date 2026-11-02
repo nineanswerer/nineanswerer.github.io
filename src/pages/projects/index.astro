@@ -4,11 +4,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
-<BaseLayout title="项目" description="九术的项目架：桌面磁盘分析、本地化工作流、浏览器自动化、个人网站与开源派生工具的真实开发复盘。">
+<BaseLayout title="项目" description="九术的项目架：桌面磁盘分析、本地化工作流、浏览器自动化与开源派生工具的真实开发复盘。">
   <div class="shell">
     <header class="page-header index-header">
       <div><span class="eyebrow">PROJECT SHELF / 项目</span><h1>做过的东西，<br />放在这个架子上。</h1></div>
-      <div class="page-intro"><p>不按框架分类，也不只展示截图。每个项目都写清问题、职责、方案、证据和还不能证明的部分。</p><span class="eyebrow">{projects.length} 个项目 / 持续修理中</span></div>
+      <div class="page-intro"><p>每个项目都介绍问题、职责、方案、证据和验证边界。</p><span class="eyebrow">{projects.length} 个项目 / 持续修理中</span></div>
     </header>
     <section class="page-content" aria-label="全部项目">
       <div class="page-meta"><span>符号 / 名称 / 职责 / 实现</span><span>点进一个项目，读它的开发复盘</span></div>

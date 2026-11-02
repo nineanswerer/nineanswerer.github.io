@@ -91,9 +91,9 @@ try {
   });
 
   const routes = [
-    '/', '/writing/', '/writing/storagescope-case-study/', '/writing/storagescope-3d-tree/',
+    '/', '/writing/', '/writing/storagescope-3d-tree/',
     '/writing/storagescope-trusted-cleanup/', '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
-    '/projects/', '/projects/storagescope/', '/projects/personal-workshop/', '/projects/minecraft-resource-extractor/',
+    '/projects/', '/projects/storagescope/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
   ];
   for (const width of [1440, 768, 390]) {
@@ -148,13 +148,13 @@ try {
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
   await page.locator('[data-blog-filter="长文"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Long-form filter should show six posts');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 5, 'Long-form filter should show five posts');
   await page.locator('[data-blog-filter="碎片"]').click();
   assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Note filter should show six notes');
   await page.locator('[data-blog-filter="全部"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 12, 'All filter should restore twelve entries');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 11, 'All filter should restore eleven entries');
   await page.screenshot({ path: path.join(output, 'writing-1440.png'), fullPage: true });
-  checks.push('blog filters: 6 long-form, 6 notes, 12 total');
+  checks.push('blog filters: 5 long-form, 6 notes, 11 total');
 
   const oldTheme = await page.locator('html').getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').click();
@@ -195,17 +195,13 @@ try {
   await page.screenshot({ path: path.join(output, 'writing-390.png'), fullPage: true });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('307,630'));
-  assert.ok((await page.locator('.project-evidence').textContent())?.includes('不是性能基准'));
+  assert.ok((await page.locator('.project-evidence').textContent())?.includes('单次自动化流程记录'));
   await page.screenshot({ path: path.join(output, 'project-390.png'), fullPage: true });
   checks.push('mobile blog and project evidence');
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'project-1440.png'), fullPage: true });
-  await page.goto(`${base}/projects/personal-workshop/`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: path.join(output, 'website-project-1440.png'), fullPage: true });
-  await page.goto(`${base}/writing/storagescope-case-study/`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: path.join(output, 'storagescope-case-study-1440.png'), fullPage: true });
   await page.goto(`${base}/now/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'now-1440.png'), fullPage: true });
 
@@ -216,7 +212,7 @@ try {
   assert.equal(await page.locator('.copy-code').first().textContent(), '已复制');
   await page.setViewportSize({ width: 768, height: 900 });
   await page.screenshot({ path: path.join(output, 'article-768.png'), fullPage: true });
-  checks.push('project and case-study desktop, now desktop, article TOC and clipboard');
+  checks.push('project and now desktop, article TOC and clipboard');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
@@ -228,11 +224,11 @@ try {
   const rssText = await rss.text();
   assert.ok(rssText.includes('StorageScope'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
-  assert.ok((rssText.match(/<item>/g) ?? []).length === 12, 'RSS should contain six long posts and six notes');
+  assert.ok((rssText.match(/<item>/g) ?? []).length === 11, 'RSS should contain five long posts and six notes');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
   assert.equal(sitemap.status(), 200);
   assert.ok((await sitemap.text()).includes('/now/'));
-  checks.push('RSS with 12 writing items and sitemap');
+  checks.push('RSS with 11 writing items and sitemap');
 
   const legacyRoutes = [
     ['/posts/hugo配置教程/', '/writing/github-pages-troubleshooting/'],
@@ -241,6 +237,8 @@ try {
     ['/posts/hello-world/', '/writing/'],
     ['/posts/测试文章1/', '/writing/'],
     ['/archives/', '/writing/'],
+    ['/projects/personal-workshop/', '/writing/hugo-to-astro-casebook/'],
+    ['/writing/storagescope-case-study/', '/projects/storagescope/'],
   ];
   for (const [legacy, target] of legacyRoutes) {
     const response = await page.request.get(`${base}${legacy}`);
@@ -252,12 +250,12 @@ try {
     await page.goto(`${base}${legacy}`, { waitUntil: 'networkidle' });
     assert.equal(new URL(page.url()).pathname, target, `${legacy} should redirect to ${target}`);
   }
-  checks.push('all six legacy Hugo links with meta refresh, canonical and manual links');
+  checks.push('six legacy Hugo links and two merged-page links with meta refresh, canonical and manual links');
 
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
-  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 12, 'No-JS blog should show all entries');
+  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 11, 'No-JS blog should show all entries');
   assert.equal(await noJsPage.locator('[data-blog-filters]').isVisible(), false, 'Filters should stay hidden without JS');
   await noJsPage.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.equal(await noJsPage.locator('h1').isVisible(), true);
