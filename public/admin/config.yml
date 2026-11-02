@@ -28,12 +28,12 @@ collections:
       default: { field: date, direction: descending }
     fields:
       - { label: 标题, name: title, widget: string }
-      - { label: 简介, name: description, widget: text }
+      - { label: 简介, name: description, widget: text, hint: 用于列表、搜索结果和页面摘要。 }
       - { label: 发布日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
-      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false, hint: 需要记录内容修订时填写；留空不会写入文章。 }
       - { label: 关联项目, name: project, widget: string, required: false, hint: 例如 storagescope；没有关联项目时留空。 }
       - { label: 标签, name: tags, widget: list, required: false }
-      - { label: 草稿, name: draft, widget: boolean, default: true, required: false }
+      - { label: 仅保存为草稿, name: draft, widget: boolean, default: true, required: false, hint: 开启时不会公开；确认发布时关闭此开关并保存。修改已发布内容后，保存会更新公开页面。 }
       - { label: 正文, name: body, widget: richtext }
 
   - name: notes
@@ -50,12 +50,12 @@ collections:
       default: { field: date, direction: descending }
     fields:
       - { label: 标题, name: title, widget: string }
-      - { label: 简介, name: description, widget: text }
+      - { label: 简介, name: description, widget: text, hint: 用于列表、搜索结果和页面摘要。 }
       - { label: 发布日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
-      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false, hint: 需要记录内容修订时填写；留空不会写入文章。 }
       - { label: 关联项目, name: project, widget: string, required: false, hint: 例如 storagescope；没有关联项目时留空。 }
       - { label: 标签, name: tags, widget: list, required: false }
-      - { label: 草稿, name: draft, widget: boolean, default: true, required: false }
+      - { label: 仅保存为草稿, name: draft, widget: boolean, default: true, required: false, hint: 开启时不会公开；确认发布时关闭此开关并保存。修改已发布内容后，保存会更新公开页面。 }
       - { label: 正文, name: body, widget: richtext }
 
   - name: projects
@@ -75,19 +75,20 @@ collections:
       - { label: 一句话说明, name: tagline, widget: string }
       - { label: 项目简介, name: description, widget: text }
       - { label: 开始日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
-      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false, hint: 需要记录内容修订时填写；留空不会写入文章。 }
       - { label: 首页重点项目, name: featured, widget: boolean, default: false, required: false }
       - { label: 当前状态, name: status, widget: string }
       - { label: 我的职责, name: role, widget: string }
       - { label: 技术栈, name: stack, widget: list }
-      - { label: 源码地址, name: repo, widget: string }
-      - { label: 发布地址, name: release, widget: string, required: false }
-      - { label: 排序, name: order, widget: number, value_type: int, default: 10 }
-      - { label: 贡献说明, name: contribution, widget: text, required: false }
+      - { label: 源码地址, name: repo, widget: string, hint: 填写完整的 https:// 地址。 }
+      - { label: 发布地址, name: release, widget: string, required: false, hint: 填写完整的 https:// 地址；没有发布地址可留空。 }
+      - { label: 排序, name: order, widget: number, value_type: int, default: 10, hint: 数字越小，项目列表中的位置越靠前。 }
+      - { label: 贡献说明, name: contribution, widget: text, required: false, hint: 直接说明你和协作者分别完成了什么。 }
       - label: 验证数字
         name: metrics
         widget: list
         required: false
+        hint: 只填写已有证据的数字，并说明统计口径。
         fields:
           - { label: 数字, name: value, widget: string }
           - { label: 口径说明, name: label, widget: string }

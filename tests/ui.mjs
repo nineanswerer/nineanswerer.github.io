@@ -264,6 +264,15 @@ try {
   await noJs.close();
   checks.push('no-JavaScript reading, navigation and legacy redirect');
 
+  const adminConfig = await readFile(path.join(dist, 'admin/config.yml'), 'utf8');
+  assert.equal((adminConfig.match(/widget: datetime/g) ?? []).length, 8, 'Admin should define eight datetime fields');
+  assert.equal((adminConfig.match(/widget: datetime, type: date, format: YYYY-MM-DD/g) ?? []).length, 8, 'All admin dates must use Day.js tokens');
+  assert.ok(!adminConfig.includes('format: yyyy-MM-dd'), 'Admin must not use date-fns tokens');
+  assert.ok(adminConfig.includes('omit_empty_optional_fields: true'), 'Admin should omit empty optional fields');
+  assert.equal((adminConfig.match(/name: draft, widget: boolean, default: true/g) ?? []).length, 2, 'New writing and notes should remain drafts by default');
+  assert.equal((adminConfig.match(/label: 仅保存为草稿/g) ?? []).length, 2, 'Draft controls should explain the save workflow');
+  checks.push('admin date formats, empty optional fields and draft-first publishing');
+
   await checkBuiltLinks();
   assert.deepEqual(externalRequests, [], `Unexpected third-party runtime requests:\n${externalRequests.join('\n')}`);
   assert.deepEqual(errors, [], `Browser errors:\n${errors.join('\n')}`);
