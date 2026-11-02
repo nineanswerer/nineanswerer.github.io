@@ -1,0 +1,114 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+backend:
+  name: github
+  repo: nineanswerer/nineanswerer.github.io
+  branch: main
+
+site_url: https://nineanswerer.github.io
+display_url: https://nineanswerer.github.io
+media_folder: /public/images
+public_folder: /images
+
+output:
+  omit_empty_optional_fields: true
+
+collections:
+  - name: writing
+    label: 长文
+    label_singular: 长文
+    folder: /src/content/writing
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields:
+      fields: [date, title]
+      default: { field: date, direction: descending }
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 简介, name: description, widget: text }
+      - { label: 发布日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 关联项目, name: project, widget: string, required: false, hint: 例如 storagescope；没有关联项目时留空。 }
+      - { label: 标签, name: tags, widget: list, required: false }
+      - { label: 草稿, name: draft, widget: boolean, default: true, required: false }
+      - { label: 正文, name: body, widget: richtext }
+
+  - name: notes
+    label: 碎片
+    label_singular: 碎片
+    folder: /src/content/notes
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields:
+      fields: [date, title]
+      default: { field: date, direction: descending }
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 简介, name: description, widget: text }
+      - { label: 发布日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 关联项目, name: project, widget: string, required: false, hint: 例如 storagescope；没有关联项目时留空。 }
+      - { label: 标签, name: tags, widget: list, required: false }
+      - { label: 草稿, name: draft, widget: boolean, default: true, required: false }
+      - { label: 正文, name: body, widget: richtext }
+
+  - name: projects
+    label: 项目
+    label_singular: 项目
+    folder: /src/content/projects
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    summary: '{{title}}'
+    sortable_fields:
+      fields: [order, date, title]
+      default: { field: order, direction: ascending }
+    fields:
+      - { label: 项目名称, name: title, widget: string }
+      - { label: 一句话说明, name: tagline, widget: string }
+      - { label: 项目简介, name: description, widget: text }
+      - { label: 开始日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
+      - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+      - { label: 首页重点项目, name: featured, widget: boolean, default: false, required: false }
+      - { label: 当前状态, name: status, widget: string }
+      - { label: 我的职责, name: role, widget: string }
+      - { label: 技术栈, name: stack, widget: list }
+      - { label: 源码地址, name: repo, widget: string }
+      - { label: 发布地址, name: release, widget: string, required: false }
+      - { label: 排序, name: order, widget: number, value_type: int, default: 10 }
+      - { label: 贡献说明, name: contribution, widget: text, required: false }
+      - label: 验证数字
+        name: metrics
+        widget: list
+        required: false
+        fields:
+          - { label: 数字, name: value, widget: string }
+          - { label: 口径说明, name: label, widget: string }
+      - label: 更新记录
+        name: updates
+        widget: list
+        required: false
+        fields:
+          - { label: 日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
+          - { label: 标题, name: title, widget: string }
+          - { label: 说明, name: description, widget: text }
+      - { label: 正文, name: body, widget: richtext }
+
+  - name: pages
+    label: 单页内容
+    files:
+      - name: now
+        label: 现在页
+        file: /src/content/now/current.md
+        fields:
+          - { label: 标题, name: title, widget: string }
+          - { label: 页面简介, name: description, widget: text }
+          - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
+          - { label: 正文, name: body, widget: richtext }
