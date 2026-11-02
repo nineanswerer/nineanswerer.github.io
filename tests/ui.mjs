@@ -195,7 +195,7 @@ try {
   await page.screenshot({ path: path.join(output, 'writing-390.png'), fullPage: true });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('307,630'));
-  assert.ok((await page.locator('.project-evidence').textContent())?.includes('单次自动化流程记录'));
+  assert.ok((await page.locator('.project-evidence').textContent())?.includes('自动化运行记录'));
   await page.screenshot({ path: path.join(output, 'project-390.png'), fullPage: true });
   checks.push('mobile blog and project evidence');
 
