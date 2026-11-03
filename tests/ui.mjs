@@ -8,7 +8,7 @@ import { chromium } from 'playwright-core';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = path.join(root, 'dist');
 const output = path.join(root, 'test-results');
-const port = 4399;
+const port = 4600;
 const base = `http://127.0.0.1:${port}`;
 await mkdir(output, { recursive: true });
 
@@ -132,6 +132,7 @@ try {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(base, { waitUntil: 'networkidle' });
   assert.equal(await page.locator('.workbench-cell').count(), 9, 'The workbench should have nine cells');
+  assert.equal(await page.locator('.footer-links a[href="/admin/"]').count(), 1, 'The footer should link to the content admin');
   await page.locator('.writing-cell').focus();
   assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('writing-cell')), true, 'Workbench cells should receive keyboard focus');
   const focusOutline = await page.locator('.writing-cell').evaluate((element) => getComputedStyle(element).outlineStyle);
