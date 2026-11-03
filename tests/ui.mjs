@@ -274,6 +274,15 @@ try {
   assert.equal((adminConfig.match(/label: 仅保存为草稿/g) ?? []).length, 2, 'Draft controls should explain the save workflow');
   checks.push('admin date formats, empty optional fields and draft-first publishing');
 
+  const adminHtml = await readFile(path.join(dist, 'admin/index.html'), 'utf8');
+  assert.ok(adminHtml.includes('src="https://unpkg.com/@sveltia/cms@0.257.0/dist/sveltia-cms.js"'), 'Admin script should use an exact version');
+  assert.match(adminHtml, /integrity="sha384-[A-Za-z0-9+/]+={0,2}"/, 'Admin script should have SHA-384 integrity protection');
+  assert.ok(adminHtml.includes('crossorigin="anonymous"'), 'Admin script integrity should use anonymous CORS');
+  assert.ok(adminHtml.includes('<meta name="referrer" content="no-referrer" />'), 'Admin should not leak referrer data');
+  assert.ok(adminHtml.includes("object-src 'none'; base-uri 'none';"), 'Admin should disable objects and base URL changes');
+  assert.ok(!adminHtml.includes('@sveltia/cms/dist/'), 'Admin script must not float to the latest version');
+  checks.push('admin script version pinning, integrity and document hardening');
+
   await checkBuiltLinks();
   assert.deepEqual(externalRequests, [], `Unexpected third-party runtime requests:\n${externalRequests.join('\n')}`);
   assert.deepEqual(errors, [], `Browser errors:\n${errors.join('\n')}`);
