@@ -2,6 +2,7 @@
 title: "StorageScope 清理整改：从“能删”到“能解释每一步”"
 description: "撤回只凭目录名作出的安全承诺，用扫描基线、保留边界、执行前复核和三种空间口径，重做 Windows 桌面清理的可信度。"
 date: 2026-11-01
+updated: 2026-11-04
 project: storagescope
 tags: ["StorageScope", "Rust", "Tauri", "文件系统", "项目复盘"]
 ---
@@ -81,10 +82,14 @@ Windows 下，合并结果使用 `FILE_STANDARD_INFO.AllocationSize` 获取分�
 
 后来把执行后的状态更新收敛为同一个重算过程：已移入回收站的目标及其基线被撤下；已合并副本从重复组、大文件和执行基线中一起移除；候选逻辑大小根据剩余项目重新计算。新增模型测试覆盖这两种情况。真实窗口复验确认合并后只剩 1 个大文件条目、0 个重复组，已合并副本保持撤下状态。
 
-## 分工与下一步
+## 分工
 
-我主导产品定义、交互决策和真实场景验收，AI 协作实现、调试与文章整理。
+九术主导产品定义、交互决策与真实场景验收，AI 协作代码实现、调试和文档整理。
 
-下一步将补公开复现脚本、跨设备验证和更多真实应用规则。规则证据、复核失败原因和空间结果来源都会随实现记录。
+## 后续进展：Beta 工程阶段结项
 
-[查看 StorageScope 项目页](/projects/storagescope/)，或回看[从扫描到 3D 结构导航的完整复盘](/writing/storagescope-case-study/)。
+上述数据记录可信清理整改时的范围。当前外部测试版已更新到 **v0.3.0-beta.2**，结项基线通过 **57 项 Rust 核心测试、8 项桌面测试和 20 项前端模型测试**。中断恢复、诊断导出、手动更新检查、安装生命周期与发布资产校验已经补齐。
+
+跨设备与真人外部测试仍待推进，Windows 回收站实际还原和清空后的卷余量测量也保留给后续验收。
+
+[查看 StorageScope 项目页](/projects/storagescope/)，阅读[Beta 结项验收记录](/writing/storagescope-beta-closure/)，或回看[从扫描到 3D 结构导航的完整复盘](/writing/storagescope-case-study/)。

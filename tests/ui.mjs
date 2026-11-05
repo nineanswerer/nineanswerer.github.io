@@ -92,11 +92,12 @@ try {
 
   const routes = [
     '/', '/writing/', '/writing/storagescope-case-study/', '/writing/storagescope-3d-tree/',
-    '/writing/storagescope-trusted-cleanup/', '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
+    '/writing/storagescope-trusted-cleanup/', '/writing/storagescope-beta-closure/',
+    '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
     '/projects/', '/projects/storagescope/', '/projects/personal-workshop/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
   ];
-  for (const width of [1440, 768, 390]) {
+  for (const width of [1440, 768, 390, 375]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of routes) {
       const response = await page.goto(`${base}${route}`, { waitUntil: 'networkidle' });
@@ -143,18 +144,22 @@ try {
   assert.equal(await page.locator('.tree-second').isVisible(), true);
   await treeToggle.click();
   assert.equal(await treeToggle.getAttribute('aria-expanded'), 'false');
+  assert.ok((await page.locator('.hero-status').textContent())?.includes('Beta 工程阶段已经结项'));
+  assert.ok((await page.locator('.making-section').textContent())?.includes('v0.3.0-beta.2'));
+  assert.equal(await page.locator('.making-links a[href="https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"]').count(), 1);
+  assert.ok((await page.locator('.home-essays').textContent())?.includes('StorageScope Beta 结项'));
   await page.screenshot({ path: path.join(output, 'home-1440.png'), fullPage: true });
-  checks.push('nine-cell keyboard focus and SVG tree expansion');
+  checks.push('nine-cell keyboard focus, SVG tree expansion and beta closure summary');
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
   await page.locator('[data-blog-filter="长文"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Long-form filter should show six posts');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 7, 'Long-form filter should show seven posts');
   await page.locator('[data-blog-filter="碎片"]').click();
   assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Note filter should show six notes');
   await page.locator('[data-blog-filter="全部"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 12, 'All filter should restore twelve entries');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 13, 'All filter should restore thirteen entries');
   await page.screenshot({ path: path.join(output, 'writing-1440.png'), fullPage: true });
-  checks.push('blog filters: 6 long-form, 6 notes, 12 total');
+  checks.push('blog filters: 7 long-form, 6 notes, 13 total');
 
   const oldTheme = await page.locator('html').getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').click();
@@ -196,8 +201,11 @@ try {
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('307,630'));
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('自动化运行记录'));
+  assert.ok((await page.locator('.project-evidence').textContent())?.includes('57 + 8 + 20'));
+  assert.ok((await page.locator('.project-hero').textContent())?.includes('v0.3.0-beta.2 已发布'));
+  assert.equal(await page.locator('.project-hero a[href="https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"]').count(), 1);
   await page.screenshot({ path: path.join(output, 'project-390.png'), fullPage: true });
-  checks.push('mobile blog and project evidence');
+  checks.push('mobile blog, project evidence and current beta release');
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
@@ -206,7 +214,15 @@ try {
   await page.screenshot({ path: path.join(output, 'website-project-1440.png'), fullPage: true });
   await page.goto(`${base}/writing/storagescope-case-study/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'storagescope-case-study-1440.png'), fullPage: true });
+  await page.goto(`${base}/writing/storagescope-beta-closure/`, { waitUntil: 'networkidle' });
+  const closureText = await page.locator('.prose').textContent();
+  assert.ok(closureText?.includes('57 项 Rust 核心测试、8 项桌面测试和 20 项前端模型测试'));
+  assert.ok(closureText?.includes('6 份快照保留'));
+  assert.ok(closureText?.includes('165.02 FPS'));
+  assert.ok(closureText?.includes('3D 场景作为主要工作区'));
+  await page.screenshot({ path: path.join(output, 'storagescope-beta-closure-1440.png'), fullPage: true });
   await page.goto(`${base}/now/`, { waitUntil: 'networkidle' });
+  assert.ok((await page.locator('main').textContent())?.includes('验证 3D 树中心工作区'));
   await page.screenshot({ path: path.join(output, 'now-1440.png'), fullPage: true });
 
   await page.goto(`${base}/writing/github-pages-troubleshooting/`, { waitUntil: 'networkidle' });
@@ -216,7 +232,7 @@ try {
   assert.equal(await page.locator('.copy-code').first().textContent(), '已复制');
   await page.setViewportSize({ width: 768, height: 900 });
   await page.screenshot({ path: path.join(output, 'article-768.png'), fullPage: true });
-  checks.push('project and case-study desktop, now desktop, article TOC and clipboard');
+  checks.push('project and case-study desktop, beta closure evidence, now desktop, article TOC and clipboard');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
@@ -227,12 +243,13 @@ try {
   assert.equal(rss.status(), 200);
   const rssText = await rss.text();
   assert.ok(rssText.includes('StorageScope'));
+  assert.ok(rssText.includes('/writing/storagescope-beta-closure/'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
-  assert.ok((rssText.match(/<item>/g) ?? []).length === 12, 'RSS should contain six long posts and six notes');
+  assert.ok((rssText.match(/<item>/g) ?? []).length === 13, 'RSS should contain seven long posts and six notes');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
   assert.equal(sitemap.status(), 200);
   assert.ok((await sitemap.text()).includes('/now/'));
-  checks.push('RSS with 12 writing items and sitemap');
+  checks.push('RSS with 13 writing items and sitemap');
 
   const legacyRoutes = [
     ['/posts/hugo配置教程/', '/writing/github-pages-troubleshooting/'],
@@ -257,7 +274,7 @@ try {
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
-  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 12, 'No-JS blog should show all entries');
+  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 13, 'No-JS blog should show all entries');
   assert.equal(await noJsPage.locator('[data-blog-filters]').isVisible(), false, 'Filters should stay hidden without JS');
   await noJsPage.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.equal(await noJsPage.locator('h1').isVisible(), true);
