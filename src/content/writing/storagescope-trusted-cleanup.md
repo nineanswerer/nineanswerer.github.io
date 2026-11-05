@@ -68,7 +68,7 @@ StorageScope 已经有扫描、快照、3D 目录树和清理入口。这次把�
 | 待清空回收站大小 | 已成功移入回收站的逻辑大小；文件仍可恢复，实际释放另行核实 |
 | 已核实分配空间释放 | 硬链接合并后，按已移除独立实体的分配大小统计的结果 |
 
-Windows 下，合并结果使用 `FILE_STANDARD_INFO.AllocationSize` 获取分配大小。任一已合并项无法完整核实时，总量显示“无法完整核实”。
+Windows 下，合并结果使用 `FILE_STANDARD_INFO.AllocationSize` 获取分配大小。任一已合并项无法完整核实时，总量显示“无法完整核实”，文件逻辑大小不用于补齐总量。
 
 在合并样本中，3 个 2.0 MiB 路径合并后仍然全部存在，内容一致，`fsutil hardlink list` 也确认它们属于同一组硬链接。移除两个独立副本后，报告为合并逻辑大小 4.0 MiB、已核实分配空间释放 4.0 MiB。前者描述处理对象，后者记录本次核实的空间结果。
 
@@ -92,4 +92,4 @@ Windows 下，合并结果使用 `FILE_STANDARD_INFO.AllocationSize` 获取分�
 
 跨设备与真人外部测试仍待推进，Windows 回收站实际还原和清空后的卷余量测量也保留给后续验收。
 
-[查看 StorageScope 项目页](/projects/storagescope/)，阅读[Beta 结项验收记录](/writing/storagescope-beta-closure/)，或回看[从扫描到 3D 结构导航的完整复盘](/writing/storagescope-case-study/)。
+[查看 StorageScope 项目页](/projects/storagescope/)，或阅读[Beta 结项验收记录](/writing/storagescope-beta-closure/)。

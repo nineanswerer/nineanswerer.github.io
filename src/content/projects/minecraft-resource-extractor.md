@@ -5,10 +5,10 @@ description: "基于 JKerboeuf 的 Minecraft Resource Extractor 进行汉化与�
 date: 2026-09-01
 status: "开源派生项目"
 role: "汉化 / 功能增强"
-stack: ["Python", "Minecraft", "Resource Tools"]
+stack: ["C#", ".NET Framework 4.7.2", "Shell", "PowerShell"]
 repo: "https://github.com/nineanswerer/Minecraft-Resource-Extractor"
 order: 5
-contribution: "本项目基于 JKerboeuf/Minecraft-Resource-Extractor。个人工作集中在中文本地化与功能增强。"
+contribution: "本项目基于 JKerboeuf/Minecraft-Resource-Extractor。我负责中文本地化与功能增强。"
 metrics: []
 ---
 
@@ -22,28 +22,20 @@ metrics: []
 
 ## 如何实现：先理解上游，再做派生修改
 
-派生开发需要先读懂已有实现、保持原有能力可用，再让改动服务于明确场景。这里的工作是在既有代码边界内完成本地化与功能增强。
+派生开发需要先读懂已有实现、保持原有能力可用，再让改动服务于明确场景。我在既有代码边界内完成本地化与功能增强。
 
 ## 难点：保持原有流程仍然可用
 
 修改界面和提取流程时，需要同时检查新增部分与上游原有行为。语言变化和流程调整都应落在真实使用路径上。
 
-## 踩坑：派生项目也要说清来源
-
-如果只展示分支仓库，很容易把上游成果误读成个人原创。因此本项目在页面与仓库中保留来源，个人贡献只写中文本地化与功能增强。
-
 ## 验证：具体差异以提交与仓库说明为准
 
 具体差异和适用版本以仓库说明及提交记录为准。上游版本兼容性以原项目说明为准。
 
-## 派生工作的贡献范围
-
-该仓库属于派生工作，体现的是理解既有项目、本地化与扩展功能的过程。个人贡献范围以页面说明和提交记录为准。
-
 ## 版本：开源派生项目
 
-源码入口指向本人的派生仓库，状态标记为“开源派生项目”。发布信息以仓库记录为准。
+源码入口指向本人的派生仓库，当前状态为“开源派生项目”。发布信息以仓库记录为准。
 
 ## 贡献与署名
 
-上游作者为 **JKerboeuf**，原项目名称为 **Minecraft-Resource-Extractor**。个人工作集中在中文本地化与功能增强。保留来源说明既是社区规范的一部分，也能让项目职责被准确评价。
+上游作者为 **JKerboeuf**，原项目名称为 **Minecraft-Resource-Extractor**。我负责中文本地化与功能增强。

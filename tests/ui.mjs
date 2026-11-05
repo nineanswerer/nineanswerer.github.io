@@ -8,7 +8,7 @@ import { chromium } from 'playwright-core';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = path.join(root, 'dist');
 const output = path.join(root, 'test-results');
-const port = 4399;
+const port = 4600;
 const base = `http://127.0.0.1:${port}`;
 await mkdir(output, { recursive: true });
 
@@ -91,10 +91,9 @@ try {
   });
 
   const routes = [
-    '/', '/writing/', '/writing/storagescope-case-study/', '/writing/storagescope-3d-tree/',
-    '/writing/storagescope-trusted-cleanup/', '/writing/storagescope-beta-closure/',
-    '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
-    '/projects/', '/projects/storagescope/', '/projects/personal-workshop/', '/projects/minecraft-resource-extractor/',
+    '/', '/writing/', '/writing/storagescope-3d-tree/', '/writing/storagescope-beta-closure/',
+    '/writing/storagescope-trusted-cleanup/', '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
+    '/projects/', '/projects/storagescope/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
   ];
   for (const width of [1440, 768, 390, 375]) {
@@ -133,6 +132,7 @@ try {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(base, { waitUntil: 'networkidle' });
   assert.equal(await page.locator('.workbench-cell').count(), 9, 'The workbench should have nine cells');
+  assert.equal(await page.locator('.footer-links a[href="/admin/"]').count(), 1, 'The footer should link to the content admin');
   await page.locator('.writing-cell').focus();
   assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('writing-cell')), true, 'Workbench cells should receive keyboard focus');
   const focusOutline = await page.locator('.writing-cell').evaluate((element) => getComputedStyle(element).outlineStyle);
@@ -153,13 +153,13 @@ try {
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
   await page.locator('[data-blog-filter="长文"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 7, 'Long-form filter should show seven posts');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Long-form filter should show six posts');
   await page.locator('[data-blog-filter="碎片"]').click();
   assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Note filter should show six notes');
   await page.locator('[data-blog-filter="全部"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 13, 'All filter should restore thirteen entries');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 12, 'All filter should restore twelve entries');
   await page.screenshot({ path: path.join(output, 'writing-1440.png'), fullPage: true });
-  checks.push('blog filters: 7 long-form, 6 notes, 13 total');
+  checks.push('blog filters: 6 long-form, 6 notes, 12 total');
 
   const oldTheme = await page.locator('html').getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').click();
@@ -210,10 +210,6 @@ try {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   await page.screenshot({ path: path.join(output, 'project-1440.png'), fullPage: true });
-  await page.goto(`${base}/projects/personal-workshop/`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: path.join(output, 'website-project-1440.png'), fullPage: true });
-  await page.goto(`${base}/writing/storagescope-case-study/`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: path.join(output, 'storagescope-case-study-1440.png'), fullPage: true });
   await page.goto(`${base}/writing/storagescope-beta-closure/`, { waitUntil: 'networkidle' });
   const closureText = await page.locator('.prose').textContent();
   assert.ok(closureText?.includes('57 项 Rust 核心测试、8 项桌面测试和 20 项前端模型测试'));
@@ -232,7 +228,7 @@ try {
   assert.equal(await page.locator('.copy-code').first().textContent(), '已复制');
   await page.setViewportSize({ width: 768, height: 900 });
   await page.screenshot({ path: path.join(output, 'article-768.png'), fullPage: true });
-  checks.push('project and case-study desktop, beta closure evidence, now desktop, article TOC and clipboard');
+  checks.push('project and beta closure evidence, now desktop, article TOC and clipboard');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
@@ -245,11 +241,11 @@ try {
   assert.ok(rssText.includes('StorageScope'));
   assert.ok(rssText.includes('/writing/storagescope-beta-closure/'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
-  assert.ok((rssText.match(/<item>/g) ?? []).length === 13, 'RSS should contain seven long posts and six notes');
+  assert.ok((rssText.match(/<item>/g) ?? []).length === 12, 'RSS should contain six long posts and six notes');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
   assert.equal(sitemap.status(), 200);
   assert.ok((await sitemap.text()).includes('/now/'));
-  checks.push('RSS with 13 writing items and sitemap');
+  checks.push('RSS with 12 writing items and sitemap');
 
   const legacyRoutes = [
     ['/posts/hugo配置教程/', '/writing/github-pages-troubleshooting/'],
@@ -258,6 +254,8 @@ try {
     ['/posts/hello-world/', '/writing/'],
     ['/posts/测试文章1/', '/writing/'],
     ['/archives/', '/writing/'],
+    ['/projects/personal-workshop/', '/writing/hugo-to-astro-casebook/'],
+    ['/writing/storagescope-case-study/', '/projects/storagescope/'],
   ];
   for (const [legacy, target] of legacyRoutes) {
     const response = await page.request.get(`${base}${legacy}`);
@@ -269,12 +267,12 @@ try {
     await page.goto(`${base}${legacy}`, { waitUntil: 'networkidle' });
     assert.equal(new URL(page.url()).pathname, target, `${legacy} should redirect to ${target}`);
   }
-  checks.push('all six legacy Hugo links with meta refresh, canonical and manual links');
+  checks.push('six legacy Hugo links and two merged-page links with meta refresh, canonical and manual links');
 
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
-  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 13, 'No-JS blog should show all entries');
+  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 12, 'No-JS blog should show all entries');
   assert.equal(await noJsPage.locator('[data-blog-filters]').isVisible(), false, 'Filters should stay hidden without JS');
   await noJsPage.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.equal(await noJsPage.locator('h1').isVisible(), true);
@@ -282,6 +280,24 @@ try {
   assert.equal(new URL(noJsPage.url()).pathname, '/writing/', 'Meta refresh should work without JS');
   await noJs.close();
   checks.push('no-JavaScript reading, navigation and legacy redirect');
+
+  const adminConfig = await readFile(path.join(dist, 'admin/config.yml'), 'utf8');
+  assert.equal((adminConfig.match(/widget: datetime/g) ?? []).length, 8, 'Admin should define eight datetime fields');
+  assert.equal((adminConfig.match(/widget: datetime, type: date, format: YYYY-MM-DD/g) ?? []).length, 8, 'All admin dates must use Day.js tokens');
+  assert.ok(!adminConfig.includes('format: yyyy-MM-dd'), 'Admin must not use date-fns tokens');
+  assert.ok(adminConfig.includes('omit_empty_optional_fields: true'), 'Admin should omit empty optional fields');
+  assert.equal((adminConfig.match(/name: draft, widget: boolean, default: true/g) ?? []).length, 2, 'New writing and notes should remain drafts by default');
+  assert.equal((adminConfig.match(/label: 仅保存为草稿/g) ?? []).length, 2, 'Draft controls should explain the save workflow');
+  checks.push('admin date formats, empty optional fields and draft-first publishing');
+
+  const adminHtml = await readFile(path.join(dist, 'admin/index.html'), 'utf8');
+  assert.ok(adminHtml.includes('src="https://unpkg.com/@sveltia/cms@0.257.0/dist/sveltia-cms.js"'), 'Admin script should use an exact version');
+  assert.match(adminHtml, /integrity="sha384-[A-Za-z0-9+/]+={0,2}"/, 'Admin script should have SHA-384 integrity protection');
+  assert.ok(adminHtml.includes('crossorigin="anonymous"'), 'Admin script integrity should use anonymous CORS');
+  assert.ok(adminHtml.includes('<meta name="referrer" content="no-referrer" />'), 'Admin should not leak referrer data');
+  assert.ok(adminHtml.includes("object-src 'none'; base-uri 'none';"), 'Admin should disable objects and base URL changes');
+  assert.ok(!adminHtml.includes('@sveltia/cms/dist/'), 'Admin script must not float to the latest version');
+  checks.push('admin script version pinning, integrity and document hardening');
 
   await checkBuiltLinks();
   assert.deepEqual(externalRequests, [], `Unexpected third-party runtime requests:\n${externalRequests.join('\n')}`);

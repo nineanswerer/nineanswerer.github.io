@@ -1,0 +1,116 @@
+@font-face {
+  font-family: "Workshop Hand";
+  src: url("/fonts/workshop-hand.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --admin-bg: #f5f0e6;
+  --admin-paper: #fffdf7;
+  --admin-paper-deep: #eee6d7;
+  --admin-ink: #25231f;
+  --admin-muted: #706a60;
+  --admin-line: #d6cdbd;
+  --admin-line-strong: #a99e8d;
+  --admin-blue: #355e9e;
+  --admin-blue-ink: #2e5289;
+  --admin-red: #b94030;
+  --admin-grid: rgb(53 94 158 / 7%);
+  --admin-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --admin-hand: "Workshop Hand", "STKaiti", "KaiTi", "Kaiti SC", serif;
+}
+
+html,
+body {
+  min-width: 320px;
+  margin: 0;
+  background-color: var(--admin-bg);
+  color: var(--admin-ink);
+}
+
+body,
+.sui.app-shell,
+html body .sui.button,
+input,
+textarea,
+select {
+  font-family: var(--admin-sans);
+}
+
+body > .sui.app-shell {
+  min-height: 100vh;
+  background-color: var(--admin-bg);
+  background-image:
+    linear-gradient(var(--admin-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--admin-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--admin-ink);
+}
+
+body > .sui.app-shell > .outer > .main {
+  background: transparent;
+}
+
+h1,
+h2,
+h3,
+[data-field-type="title"] input {
+  font-family: var(--admin-hand);
+  font-weight: 400;
+}
+
+a {
+  color: var(--admin-blue-ink);
+  text-underline-offset: 4px;
+}
+
+html body .sui.button {
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+html body .sui.button.primary {
+  border-color: var(--admin-ink);
+  background: var(--admin-ink);
+  color: var(--admin-bg);
+}
+
+html body .sui.button.primary:hover {
+  border-color: var(--admin-blue);
+  background: var(--admin-blue);
+  color: #fff;
+}
+
+html body .sui.button.secondary {
+  border-color: var(--admin-line-strong);
+  background: var(--admin-paper);
+  color: var(--admin-ink);
+}
+
+html body .sui.button.secondary:hover {
+  border-color: var(--admin-blue);
+  color: var(--admin-blue-ink);
+}
+
+input,
+textarea,
+select {
+  border-radius: 2px;
+}
+
+[data-field-type] input,
+[data-field-type] textarea,
+[data-field-type] select {
+  background-color: var(--admin-paper);
+}
+
+[data-field-type="title"] input {
+  font-size: 1.5em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--admin-blue);
+  outline-offset: 3px;
+}

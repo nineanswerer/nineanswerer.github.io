@@ -27,7 +27,7 @@ tags: ["GitHub Pages", "Git", "部署"]
 https://nineanswerer.github.io/
 ```
 
-仓库名也应与 GitHub 用户名完全一致。旧站曾经把 `nineanswerer` 少写了字符，造成路径和预期不一致。修改仓库名后，本地远端也要同步：
+用户主站的完整仓库名应为 `<用户名>.github.io`，其中用户名部分必须准确。旧站曾经把 `nineanswerer` 少写了字符，造成路径和预期不一致。修改仓库名后，本地远端也要同步：
 
 ```bash
 git remote set-url origin https://github.com/nineanswerer/nineanswerer.github.io.git
