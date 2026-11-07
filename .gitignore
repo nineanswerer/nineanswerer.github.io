@@ -1,4 +1,5 @@
 node_modules/
+.preview/
 .font-tools/
 font-source/
 dist/

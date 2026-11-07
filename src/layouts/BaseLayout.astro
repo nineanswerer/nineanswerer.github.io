@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import '../styles/pages.css';
+import '../styles/shared.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config';
@@ -9,14 +10,18 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  imageAlt?: string;
   noindex?: boolean;
+  bodyClass?: string;
 }
 
 const {
   title,
   description = site.description,
-  image = '/images/storagescope-tree.webp',
+  image = '/images/workshop-cover.png',
+  imageAlt = '九术的工作台',
   noindex = false,
+  bodyClass,
 } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.title;
 const canonical = new URL(Astro.url.pathname, site.url);
@@ -31,10 +36,10 @@ const isArticle = Astro.url.pathname.startsWith('/writing/') && Astro.url.pathna
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="author" content={`${site.name} / ${site.handle}`} />
-    <meta name="theme-color" content="#f5f0e6" />
+    <meta name="theme-color" content="#f2f1e9" />
     <meta name="color-scheme" content="light dark" />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title={site.title} href={new URL('/rss.xml', site.url)} />
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -44,9 +49,9 @@ const isArticle = Astro.url.pathname.startsWith('/writing/') && Astro.url.pathna
     <meta property="og:site_name" content={site.title} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={socialImage} />
-    <meta property="og:image:alt" content={image.includes('storagescope') ? 'StorageScope 三维目录树真实应用截图' : '九术的工作台'} />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{pageTitle}</title>
     <script is:inline>
@@ -58,7 +63,7 @@ const isArticle = Astro.url.pathname.startsWith('/writing/') && Astro.url.pathna
       })();
     </script>
   </head>
-  <body>
+  <body class={bodyClass}>
     <a class="skip-link" href="#main">跳到正文</a>
     <Header />
     <main id="main">

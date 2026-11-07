@@ -17,6 +17,8 @@ let browser;
 const errors = [];
 const externalRequests = [];
 const checks = [];
+const homeSettings = JSON.parse(await readFile(path.join(root, 'src/content/home/index.json'), 'utf8'));
+let feedCounts;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function stopServer() {
@@ -131,35 +133,28 @@ try {
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(base, { waitUntil: 'networkidle' });
-  assert.equal(await page.locator('.workbench-cell').count(), 9, 'The workbench should have nine cells');
   assert.equal(await page.locator('.footer-links a[href="/admin/"]').count(), 1, 'The footer should link to the content admin');
-  await page.locator('.writing-cell').focus();
-  assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('writing-cell')), true, 'Workbench cells should receive keyboard focus');
-  const focusOutline = await page.locator('.writing-cell').evaluate((element) => getComputedStyle(element).outlineStyle);
+  await page.locator('.hero-project-link').focus();
+  assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('hero-project-link')), true, 'The project entry should receive keyboard focus');
+  const focusOutline = await page.locator('.hero-project-link').evaluate((element) => getComputedStyle(element).outlineStyle);
   assert.notEqual(focusOutline, 'none', 'Focused workbench cells need a visible outline');
-  const treeToggle = page.locator('[data-tree-toggle]');
-  assert.equal(await treeToggle.getAttribute('aria-expanded'), 'false');
-  await treeToggle.click();
-  assert.equal(await treeToggle.getAttribute('aria-expanded'), 'true');
-  assert.equal(await page.locator('.tree-second').isVisible(), true);
-  await treeToggle.click();
-  assert.equal(await treeToggle.getAttribute('aria-expanded'), 'false');
-  assert.ok((await page.locator('.hero-status').textContent())?.includes('Beta 工程阶段已经结项'));
+  assert.ok((await page.locator('.hero-status').textContent())?.includes(homeSettings.status));
   assert.ok((await page.locator('.making-section').textContent())?.includes('v0.3.0-beta.2'));
   assert.equal(await page.locator('.making-links a[href="https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"]').count(), 1);
-  assert.ok((await page.locator('.home-essays').textContent())?.includes('StorageScope Beta 结项'));
+  assert.ok((await page.locator('.journal-list').textContent())?.includes('StorageScope Beta 结项'));
   await page.screenshot({ path: path.join(output, 'home-1440.png'), fullPage: true });
-  checks.push('nine-cell keyboard focus, SVG tree expansion and beta closure summary');
+  checks.push('project-entry keyboard focus and beta closure summary');
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
+  feedCounts = { posts: await page.locator('[data-feed-kind="长文"]').count(), notes: await page.locator('[data-feed-kind="碎片"]').count(), total: await page.locator('[data-feed-kind]').count() };
   await page.locator('[data-blog-filter="长文"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Long-form filter should show six posts');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), feedCounts.posts, 'Long-form filter should show all published posts');
   await page.locator('[data-blog-filter="碎片"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 6, 'Note filter should show six notes');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), feedCounts.notes, 'Note filter should show all published notes');
   await page.locator('[data-blog-filter="全部"]').click();
-  assert.equal(await page.locator('[data-feed-kind]:visible').count(), 12, 'All filter should restore twelve entries');
+  assert.equal(await page.locator('[data-feed-kind]:visible').count(), feedCounts.total, 'All filter should restore every published entry');
   await page.screenshot({ path: path.join(output, 'writing-1440.png'), fullPage: true });
-  checks.push('blog filters: 6 long-form, 6 notes, 12 total');
+  checks.push(`blog filters: ${feedCounts.posts} long-form, ${feedCounts.notes} notes, ${feedCounts.total} total`);
 
   const oldTheme = await page.locator('html').getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').click();
@@ -192,7 +187,7 @@ try {
   assert.ok((await page.locator('h1').textContent())?.includes('最近'));
   await page.screenshot({ path: path.join(output, 'now-390.png'), fullPage: true });
   await page.goto(base, { waitUntil: 'networkidle' });
-  assert.equal(await page.locator('.mini-tree-actions a[href="/projects/storagescope/"]').isVisible(), true, 'Mobile tree should keep its project entry');
+  assert.equal(await page.locator('.featured-entry[href="/projects/storagescope/"]').isVisible(), true, 'The mobile homepage should keep its project entry');
   await page.screenshot({ path: path.join(output, 'home-390.png'), fullPage: true });
   checks.push('mobile navigation, now page and visible tree project entry');
 
@@ -241,11 +236,11 @@ try {
   assert.ok(rssText.includes('StorageScope'));
   assert.ok(rssText.includes('/writing/storagescope-beta-closure/'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
-  assert.ok((rssText.match(/<item>/g) ?? []).length === 12, 'RSS should contain six long posts and six notes');
+  assert.ok((rssText.match(/<item>/g) ?? []).length === feedCounts.total, 'RSS should contain every published feed item');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
   assert.equal(sitemap.status(), 200);
   assert.ok((await sitemap.text()).includes('/now/'));
-  checks.push('RSS with 12 writing items and sitemap');
+  checks.push('RSS agrees with published writing and notes; sitemap exists');
 
   const legacyRoutes = [
     ['/posts/hugo配置教程/', '/writing/github-pages-troubleshooting/'],
@@ -272,7 +267,7 @@ try {
   const noJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const noJsPage = await noJs.newPage();
   await noJsPage.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
-  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), 12, 'No-JS blog should show all entries');
+  assert.equal(await noJsPage.locator('[data-feed-kind]:visible').count(), feedCounts.total, 'No-JS blog should show all entries');
   assert.equal(await noJsPage.locator('[data-blog-filters]').isVisible(), false, 'Filters should stay hidden without JS');
   await noJsPage.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.equal(await noJsPage.locator('h1').isVisible(), true);

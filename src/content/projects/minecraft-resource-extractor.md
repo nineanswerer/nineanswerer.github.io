@@ -7,7 +7,11 @@ status: "开源派生项目"
 role: "汉化 / 功能增强"
 stack: ["C#", ".NET Framework 4.7.2", "Shell", "PowerShell"]
 repo: "https://github.com/nineanswerer/Minecraft-Resource-Extractor"
-order: 5
+order: 4
+presentation:
+  kind: extraction
+  eyebrow: OPEN SOURCE / RESOURCE TOOL
+  caption: "让既有的工具，更贴近中文使用场景。"
 contribution: "本项目基于 JKerboeuf/Minecraft-Resource-Extractor。我负责中文本地化与功能增强。"
 metrics: []
 ---

@@ -1,0 +1,24 @@
+---
+interface Props { articleUrl?: string }
+const { articleUrl } = Astro.props;
+const image = '/images/storagescope-tree.webp';
+---
+<section class="interface-showcase" id="interface" aria-labelledby="interface-title">
+  <div class="section-heading">
+    <div><span class="eyebrow">A CLOSER LOOK / 实际界面</span><h2 id="interface-title">先看一张图，再聊怎么做。</h2></div>
+    <span class="interface-source">真实应用截图 · 已隐去本机路径</span>
+  </div>
+  <figure class="interface-figure">
+    <a class="interface-image" href={image} target="_blank" rel="noreferrer" aria-label="在新标签页打开 StorageScope 完整截图">
+      <img src={image} alt="StorageScope 的实际三维目录树：目录节点沿父子连线展开，Packages 与 Media 标签标出部分分支" width="1384" height="841" loading="lazy" />
+      <span class="interface-enlarge">查看大图 ↗</span>
+    </a>
+    <figcaption>图中的文件夹、连线与标签，分别承担节点识别、层级关系与位置提示。此图用于说明结构表达。</figcaption>
+  </figure>
+  <ol class="interface-guide">
+    <li><span class="guide-number">01</span><div><h3>顺着连线，看目录层级</h3><p>先找到主要分支，理解目录之间的父子关系。</p></div></li>
+    <li><span class="guide-number">02</span><div><h3>借助标签，确认位置</h3><p>标签提供名称线索，细节按当前阅读任务呈现。</p></div></li>
+    <li><span class="guide-number">03</span><div><h3>进入分支，继续定位</h3><p>应用支持点击下钻、Esc 返回与 R 重置。</p></div></li>
+  </ol>
+  <div class="interface-context"><p>该截图不展示扫描完整性或操作过程。大目录样本、验收条件与当前限制，见下方验证记录。</p>{articleUrl && <a class="text-link" href={articleUrl}>读图背后的设计取舍 →</a>}</div>
+</section>

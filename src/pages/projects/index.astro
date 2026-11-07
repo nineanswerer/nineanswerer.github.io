@@ -1,8 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPublishedProjects } from '../../content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
-const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getPublishedProjects()).sort((a, b) => a.data.order - b.data.order);
 ---
 <BaseLayout title="项目" description="九术的项目架：桌面磁盘分析、本地化工作流、浏览器自动化与开源派生工具的真实开发复盘。">
   <div class="shell">

@@ -1,12 +1,12 @@
 ---
 import { site } from '../config';
-import DoodleIcon from './DoodleIcon.astro';
 ---
-<footer class="site-footer">
+<footer class="site-footer editorial-footer">
   <div class="shell footer-main">
     <div class="footer-note">
-      <DoodleIcon name="spark" size={32} />
-      <p>这个网站本身也是一个持续修理中的项目。<br />有些地方还不够好，我还在慢慢改。</p>
+      <span class="index-label">KEEP EXPLORING</span>
+      <p>想法，还在继续<span>↗</span></p>
+      <a href={site.github} target="_blank" rel="noreferrer" class="footer-github">在 GitHub 找到我 ↗</a>
     </div>
     <nav class="footer-links" aria-label="页脚导航">
       <a href={site.github} target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
@@ -16,8 +16,9 @@ import DoodleIcon from './DoodleIcon.astro';
       <a href="/admin/">内容后台 <span>→</span></a>
     </nav>
   </div>
+  <div class="shell footer-wordmark" aria-hidden="true">NINEANSWERER<span>©</span></div>
   <div class="shell footer-base">
     <span>© {new Date().getFullYear()} 九术 / NineAnswerer</span>
-    <span>用纸、墨水和 Astro 搭建</span>
+    <span>持续制作，持续记录。</span>
   </div>
 </footer>

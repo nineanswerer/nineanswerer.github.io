@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" role="img" aria-labelledby="title desc">
+  <title id="title">目录概览原理示意</title>
+  <desc id="desc">示例根目录连接三个主要分支，各分支还有更深的子目录；概览突出主干，较深节点用浅色表示。</desc>
+  <rect width="320" height="230" fill="#fffdf7"/>
+  <g fill="none" stroke="#355e9e" stroke-width="1.5">
+    <path d="M160 54v23M160 77 62 106M160 77v29M160 77l98 29"/>
+    <g stroke="#c1cbd9"><path d="M62 122v20m0 0-28 25m28-25 28 25M160 122v20m0 0-28 25m28-25 28 25M258 122v20m0 0-28 25m28-25 28 25"/></g>
+  </g>
+  <g fill="#f5f0e6" stroke="#355e9e" stroke-width="1.5">
+    <rect x="137" y="30" width="46" height="25" rx="2"/>
+    <rect x="40" y="102" width="44" height="25" rx="2"/><rect x="138" y="102" width="44" height="25" rx="2"/><rect x="236" y="102" width="44" height="25" rx="2"/>
+    <g fill="#f4f4f1" stroke="#c1cbd9"><rect x="23" y="165" width="22" height="17"/><rect x="79" y="165" width="22" height="17"/><rect x="121" y="165" width="22" height="17"/><rect x="177" y="165" width="22" height="17"/><rect x="219" y="165" width="22" height="17"/><rect x="275" y="165" width="22" height="17"/></g>
+  </g>
+  <g fill="#25231f" font-family="sans-serif" font-size="14" text-anchor="middle"><text x="160" y="48">根</text><text x="62" y="120">A</text><text x="160" y="120">B</text><text x="258" y="120">C</text></g>
+  <text x="160" y="213" fill="#706a60" font-family="sans-serif" font-size="13" text-anchor="middle">示例结构 · 非应用截图</text>
+</svg>

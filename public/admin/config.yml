@@ -76,7 +76,28 @@ collections:
       - { label: 项目简介, name: description, widget: text }
       - { label: 开始日期, name: date, widget: datetime, type: date, format: YYYY-MM-DD, default: '{{now}}' }
       - { label: 更新日期, name: updated, widget: datetime, type: date, format: YYYY-MM-DD, required: false, hint: 需要记录内容修订时填写；留空不会写入文章。 }
-      - { label: 首页重点项目, name: featured, widget: boolean, default: false, required: false }
+      - { label: 首页重点项目, name: featured, widget: boolean, default: false, required: false, hint: 多项开启时优先展示排序数字最小的项目。 }
+      - { label: 仅保存为草稿, name: draft, widget: boolean, default: true, required: false, hint: 草稿不会出现在首页、项目架、搜索和详情页面。 }
+      - label: 视觉呈现（可选）
+        name: presentation
+        widget: object
+        required: false
+        fields:
+          - { label: 卡片类型, name: kind, widget: select, options: [generic, translation, extraction, flow], default: generic }
+          - { label: 小标题, name: eyebrow, widget: string, required: false }
+          - { label: 首页短说明, name: caption, widget: string, required: false }
+          - { label: 重点标题分行, name: titleLines, widget: list, required: false, hint: 最多三行；留空使用项目名称。 }
+          - label: 展示图片
+            name: cover
+            widget: object
+            required: false
+            fields:
+              - { label: 图片, name: src, widget: image, required: true }
+              - { label: 替代文字, name: alt, widget: string }
+              - { label: 原图宽度, name: width, widget: number, value_type: int, min: 1 }
+              - { label: 原图高度, name: height, widget: number, value_type: int, min: 1 }
+              - { label: 图片说明, name: note, widget: string, required: false }
+      - { label: 验证范围说明, name: evidenceNote, widget: text, required: false }
       - { label: 当前状态, name: status, widget: string }
       - { label: 我的职责, name: role, widget: string }
       - { label: 技术栈, name: stack, widget: list }
@@ -105,6 +126,28 @@ collections:
   - name: pages
     label: 单页内容
     files:
+      - name: home
+        label: 首页内容与视觉开关
+        file: /src/content/home/index.json
+        fields:
+          - { label: 实验期号, name: edition, widget: string }
+          - { label: 首页标题（两行）, name: heading, widget: list, min: 2, max: 2 }
+          - { label: 自我介绍, name: intro, widget: text }
+          - { label: 最近状态, name: status, widget: string }
+          - { label: 首页项目数上限, name: projectsLimit, widget: number, value_type: int, min: 1, max: 12, default: 6 }
+          - label: 交互雕塑
+            name: visual
+            widget: object
+            fields:
+              - { label: 启用交互, name: enabled, widget: boolean, default: true, hint: 关闭后显示静态构成，内容仍然完整可用。 }
+              - { label: 默认自动旋转, name: autoplay, widget: boolean, default: true, hint: 浏览者的减少动态效果设置优先。 }
+          - label: 关于我
+            name: about
+            widget: object
+            fields:
+              - { label: 标题（两行）, name: heading, widget: list, min: 2, max: 2 }
+              - { label: 简介, name: text, widget: text }
+              - { label: 协作说明, name: collaboration, widget: text }
       - name: now
         label: 现在页
         file: /src/content/now/current.md

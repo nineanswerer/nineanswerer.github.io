@@ -7,7 +7,11 @@ status: "可用版本"
 role: "核心设计与开发"
 stack: ["Python", "Playwright", "Browser Automation", "Reporting"]
 repo: "https://github.com/nineanswerer/tenxunyun-publish"
-order: 4
+order: 5
+presentation:
+  kind: flow
+  eyebrow: BROWSER AUTOMATION
+  caption: "操作有结果，失败有现场。"
 metrics: []
 ---
 

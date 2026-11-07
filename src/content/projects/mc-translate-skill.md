@@ -8,6 +8,10 @@ role: "核心设计与开发"
 stack: ["Python 3.11+", "Adapter", "Cache", "Workflow"]
 repo: "https://github.com/nineanswerer/mc-Translate-skill"
 order: 3
+presentation:
+  kind: translation
+  eyebrow: MINECRAFT LOCALIZATION
+  caption: "让每次翻译，都能接着上次继续。"
 metrics: []
 ---
 

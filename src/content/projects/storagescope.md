@@ -12,6 +12,17 @@ stack: ["Rust", "Tauri 2", "React", "TypeScript", "Three.js"]
 repo: "https://github.com/nineanswerer/StorageScope"
 release: "https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"
 order: 1
+presentation:
+  kind: generic
+  eyebrow: "WINDOWS DESKTOP / 磁盘空间分析"
+  titleLines: ["Storage", "Scope"]
+  cover:
+    src: /images/storagescope-tree.webp
+    alt: "StorageScope 实际三维目录树的局部画面，目录节点通过层级连线展开"
+    width: 1384
+    height: 841
+    note: "真实截图局部 · 已隐去本机路径"
+evidenceNote: "真实目录的约 24 秒是包含固定等待的单次自动化运行记录；测试数字对应当前结项基线。其他设备上的结果仍需重新测量，验证范围与限制见上文。"
 updates:
   - date: 2026-11-04
     title: "Beta 工程阶段结项"

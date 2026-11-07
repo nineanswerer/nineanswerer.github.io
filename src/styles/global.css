@@ -8,41 +8,41 @@
 
 :root {
   color-scheme: light;
-  --bg: #f5f0e6;
-  --paper: #fffdf7;
-  --paper-deep: #eee6d7;
-  --ink: #25231f;
-  --muted: #706a60;
-  --faint: #70695e;
-  --line: #d6cdbd;
-  --line-strong: #a99e8d;
-  --blue: #355e9e;
-  --blue-ink: #2e5289;
-  --red: #d94d38;
-  --red-ink: #b94030;
+  --bg: #f2f1e9;
+  --paper: #fbfaf5;
+  --paper-deep: #e8e8de;
+  --ink: #242823;
+  --muted: #64675e;
+  --faint: #686b63;
+  --line: #d5d7cd;
+  --line-strong: #b5b9ad;
+  --blue: #304de9;
+  --blue-ink: #2945d5;
+  --red: #304de9;
+  --red-ink: #2945d5;
   --grid: rgb(53 94 158 / 7%);
   --code-bg: #eee8dc;
-  --shadow: 6px 8px 0 rgb(63 52 37 / 6%);
+  --shadow: none;
   --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   --hand: "Workshop Hand", "STKaiti", "KaiTi", "Kaiti SC", serif;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --shell: 1160px;
+  --shell: 1280px;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #191a18;
-  --paper: #242520;
-  --paper-deep: #2e2e27;
-  --ink: #ece7dc;
-  --muted: #b0a99b;
-  --faint: #898376;
-  --line: #44443b;
-  --line-strong: #6a6659;
-  --blue: #86a9e4;
-  --blue-ink: #9bb9eb;
-  --red: #ee806b;
-  --red-ink: #f0927e;
+  --bg: #20231f;
+  --paper: #292d26;
+  --paper-deep: #33382f;
+  --ink: #f1f1e8;
+  --muted: #b6bcb0;
+  --faint: #adb5a6;
+  --line: #41483c;
+  --line-strong: #66715e;
+  --blue: #9eafff;
+  --blue-ink: #adbbff;
+  --red: #9eafff;
+  --red-ink: #adbbff;
   --grid: rgb(134 169 228 / 7%);
   --code-bg: #30312a;
   --shadow: 6px 8px 0 rgb(0 0 0 / 14%);
@@ -53,7 +53,7 @@
 html { scroll-behavior: smooth; scroll-padding-top: 32px; }
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
   background-color: var(--bg);
   background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 24px 24px;
@@ -201,7 +201,7 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   .footer-note p { font-size: 21px; }
   .footer-links { max-width: 360px; }
   .footer-base { flex-direction: column; gap: 4px; }
-  .prose { font-size: 15px; }
+  .prose { font-size: 16px; }
   .prose pre { padding: 20px 16px; font-size: 12px; }
 }
 

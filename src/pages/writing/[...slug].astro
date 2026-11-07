@@ -1,4 +1,5 @@
 ---
+import { getPublishedProjects } from '../../content';
 import { getCollection, render } from 'astro:content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 
@@ -8,7 +9,7 @@ export async function getStaticPaths() {
 }
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
-const projects = post.data.project ? await getCollection('projects') : [];
+const projects = post.data.project ? await getPublishedProjects() : [];
 const relatedProject = projects.find((project) => project.id === post.data.project);
 ---
 <ArticleLayout title={post.data.title} description={post.data.description} date={post.data.date} updated={post.data.updated} tags={post.data.tags} headings={headings} relatedProject={relatedProject}>

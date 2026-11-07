@@ -2,7 +2,7 @@
 title: "30 万文件目录的 3D 可视化：从节点爆炸到可读结构"
 description: "StorageScope 的三维目录树为什么不做成文件总数的镜像，以及节点预算、LOD、标签避让和拾取如何共同服务结构阅读。"
 date: 2026-11-01
-updated: 2026-11-04
+updated: 2026-11-05
 project: storagescope
 tags: ["Three.js", "可视化", "StorageScope"]
 ---
@@ -15,6 +15,11 @@ StorageScope 的 3D 树回答一个明确问题：**当前目录如何分层，�
 
 最初设计从线性树调整为类似立体思维导图的 3D 树。开发中根据拾取和视觉反馈调整过小球节点，后续设计优先表达父子关系、分支走向和当前位置。场景对象数量由当前阅读任务决定。
 
+<figure class="reading-figure">
+  <a href="/images/storagescope-tree.webp" target="_blank" rel="noreferrer"><img src="/images/storagescope-tree.webp" alt="StorageScope 实际三维目录树截图，文件夹节点通过层级连线向外展开，Packages 与 Media 标签标出部分目录" width="1384" height="841" loading="lazy" /></a>
+  <figcaption>真实应用截图，已隐去本机路径。先沿连线辨认分支，再借助标签确认位置。点击可查看大图；操作方式与验证条件见 <a href="/projects/storagescope/#interface">项目界面导览</a>。</figcaption>
+</figure>
+
 ## 第一层取舍：完整数据与可见规模分别处理
 
 真实目录可以包含几十万文件。即使硬件足够渲染这些对象，人也无法在同一屏里理解它们。可视化需要保留完整数据，同时限制当前场景中的表达规模。
@@ -22,6 +27,19 @@ StorageScope 的 3D 树回答一个明确问题：**当前目录如何分层，�
 节点预算就是这道边界。根路径、当前路径和重要分支优先显示，远处或更细的内容在需要时展开。预算只限制同屏信息量，扫描结果和底层数据保持完整。
 
 大目录验证同时检查扫描完整性与视图可操作性。
+
+<div class="decision-figures">
+  <figure class="reading-figure">
+    <img src="/images/tree-overview.svg" alt="原理示意：概览强调根目录与 A、B、C 三个主要分支，深层子目录弱化显示" width="320" height="230" loading="lazy" />
+    <figcaption><strong>概览：先读主干</strong>优先回答“有哪些主要分支”，细节随任务展开。</figcaption>
+  </figure>
+  <figure class="reading-figure">
+    <img src="/images/tree-focus.svg" alt="原理示意：进入 B 分支后，突出 B-1 与 B-2，并保留返回根目录的路径" width="320" height="230" loading="lazy" />
+    <figcaption><strong>聚焦：再读局部</strong>进入一个分支后，把显示空间留给当前目录的细节。</figcaption>
+  </figure>
+</div>
+
+以上两图用同一个虚构的小目录解释显示取舍，属于原理示意，不代表应用的实际布局或性能。要检查真实实现，需要结合上方截图、源码和操作验收记录。
 
 ## 第二层取舍：LOD 调整细节，保留事实
 

@@ -1,0 +1,13 @@
+{
+  "edition": "EXPERIMENT NO. 003 / 从混沌到结构",
+  "heading": ["保持好奇", "动手做出来"],
+  "intro": "我是九术。围绕桌面应用、Minecraft 工具与自动化，把实际遇到的问题，做成真正能用的东西。",
+  "status": "StorageScope Beta 工程阶段已经结项",
+  "projectsLimit": 6,
+  "visual": { "enabled": true, "autoplay": true },
+  "about": {
+    "heading": ["好用的东西，", "来自具体的问题。"],
+    "text": "大数据专业背景，持续练习桌面应用、自动化工具与数据处理。我关心一个想法为什么值得做、怎样变得好用，以及它在真实场景里是否成立。",
+    "collaboration": "采用 AI 协作的项目中，我负责需求、产品方向、交互决策与真实场景验收。具体分工写在各项目里。"
+  }
+}

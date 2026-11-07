@@ -1,0 +1,18 @@
+---
+interface Props { enabled?: boolean; autoplay?: boolean }
+const { enabled = true, autoplay = true } = Astro.props;
+---
+<figure class="kinetic-sculpture" data-sculpture={enabled ? '' : undefined} data-autoplay={autoplay} data-shape="knot" aria-labelledby="sculpture-caption">
+  <div class="sculpture-stage">
+    <div class="sculpture-fallback" aria-hidden="true"><span></span><span></span><span></span></div>
+    {enabled && <canvas data-sculpture-canvas aria-label="可交互的蓝色结状雕塑" aria-describedby="sculpture-instruction"></canvas>}
+    <span class="sculpture-cross sculpture-cross-start" aria-hidden="true">+</span><span class="sculpture-cross sculpture-cross-end" aria-hidden="true">+</span>
+    <span class="sculpture-coordinate" aria-hidden="true">X / Y / Z<br />FORM IN MOTION</span>
+  </div>
+  <figcaption id="sculpture-caption"><span><b>FORM STUDY / 001</b><span class="sculpture-instruction" id="sculpture-instruction">{enabled ? '拖动或用方向键旋转' : '从形状读结构 · 静态构成'}</span></span>{enabled && <div class="sculpture-controls" hidden><button type="button" data-sculpture-shape aria-pressed="false">展开结构 <span aria-hidden="true">↗</span></button><button type="button" data-sculpture-pause aria-pressed="false">暂停转动 <span aria-hidden="true">Ⅱ</span></button></div>}</figcaption>
+</figure>
+<script>
+  import { mountSculpture } from '../scripts/sculpture';
+  const disposers = [...document.querySelectorAll<HTMLElement>('[data-sculpture]')].map(mountSculpture);
+  document.addEventListener('astro:before-swap', () => disposers.forEach((dispose) => dispose?.()), { once: true });
+</script>

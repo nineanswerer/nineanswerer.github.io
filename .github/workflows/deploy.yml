@@ -25,10 +25,14 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Test content growth rules
+        run: npm test
       - name: Check content and types
         run: npm run check
       - name: Build site
         run: npm run build
+      - name: Check links and page budgets
+        run: npm run verify:build
       - name: Setup Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Upload artifact

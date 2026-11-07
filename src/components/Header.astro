@@ -7,10 +7,10 @@ const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith
   <div class="shell header-inner">
     <a class="brand" href="/" aria-label="九术的工作台，返回首页">
       <span class="brand-mark" aria-hidden="true">九<span></span></span>
-      <span class="brand-type"><strong>九术的工作台</strong><small>NINE'S WORKSHOP</small></span>
+      <span class="brand-type"><strong>NINEANSWERER</strong><small>九术的工作台</small></span>
     </a>
     <nav class="main-nav desktop-nav" aria-label="主导航">
-      {navigation.map((item) => <a href={item.href} class:list={[{ active: isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>)}
+      {navigation.map((item,index) => <a href={item.href} class:list={[{ active: isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-number" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{item.label}</a>)}
     </nav>
     <div class="header-actions">
       <a class="search-link" href="/search/" aria-label="搜索项目和文章">
@@ -33,7 +33,7 @@ const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith
       const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.dataset.theme = next;
       try { localStorage.setItem('theme', next); } catch { /* The visual toggle still works without storage. */ }
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#191a18' : '#f5f0e6');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#20231f' : '#f2f1e9');
     });
   });
 </script>

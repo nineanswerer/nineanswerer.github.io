@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { project: CollectionEntry<'projects'>; index: number }
+const { project, index } = Astro.props;
+const { data } = project;
+const { kind, cover, eyebrow = 'INDEPENDENT PROJECT', caption = data.tagline } = data.presentation;
+const href = `/projects/${project.id}/`;
+const number = String(index + 2).padStart(2, '0');
+---
+{kind === 'flow' ? <a class="automation-project" href={href} data-reveal>
+  <span class="project-index">{number}</span><div><span class="index-label">{eyebrow}</span><h3>{data.title}</h3><p>{caption}</p></div>
+  <div class="automation-flow" aria-hidden="true"><span>执行</span><i></i><span>判定</span><i></i><span>记录</span></div><span class="automation-arrow" aria-hidden="true">↗</span>
+</a> : <article class:list={['visual-project', { 'project-offset': index % 2 === 1 }]} data-reveal>
+  <a href={href} class:list={['project-art', `${kind}-art`]} aria-label={`查看 ${data.title} 项目`} data-hover-art>
+    <span class="art-caption">{eyebrow}</span>
+    {cover ? <img class="project-card-cover" src={cover.src} width={cover.width} height={cover.height} alt={cover.alt} loading="lazy" /> : kind === 'translation' ?
+      <div class="translation-composition" aria-hidden="true"><div class="language-sheet sheet-original"><span>SOURCE</span><strong>Aa</strong><div class="sheet-lines"></div></div><span class="translation-arrow">↗</span><div class="language-sheet sheet-translated"><span>LOCALIZED</span><strong>译</strong><div class="sheet-lines"></div></div></div> : kind === 'extraction' ?
+      <div class="extraction-composition" aria-hidden="true"><div class="resource-folder folder-back"></div><div class="resource-sheet resource-sheet-one">路径</div><div class="resource-sheet resource-sheet-two">资源</div><div class="resource-folder folder-front"><span>提取<br />所需。</span><span class="folder-corner">↗</span></div></div> :
+      <div class="generic-composition" aria-hidden="true"><span>{number}</span><i></i><b>↗</b></div>}
+    <div class="art-bottom"><span>{data.status}</span><span class="art-arrow" aria-hidden="true">↗</span></div>
+  </a>
+  <div class="visual-project-caption"><span class="project-index">{number}</span><div><h3><a href={href}>{data.title}</a></h3><p>{caption}</p><span class="project-caption-meta">{data.stack.slice(0, 3).join(' / ')}</span></div></div>
+</article>}

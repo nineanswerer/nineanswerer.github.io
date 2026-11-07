@@ -13,4 +13,10 @@ export default defineConfig({
   },
   build: { format: 'directory' },
   devToolbar: { enabled: false },
+  // Prebundle CommonJS loaders for Astro's content-sync module runner.
+  vite: {
+    environments: {
+      astro: { optimizeDeps: { include: ['yaml', 'picomatch'] } },
+    },
+  },
 });

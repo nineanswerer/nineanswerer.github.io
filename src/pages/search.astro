@@ -1,8 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPublishedProjects } from '../content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getFeedItems } from '../content';
-const projects = await getCollection('projects');
+const projects = await getPublishedProjects();
 const feed = await getFeedItems();
 const items = [
   ...projects.map((project) => ({ type: '项目', title: project.data.title, description: project.data.description, url: `/projects/${project.id}/`, keywords: [...project.data.stack, project.data.tagline, project.data.role].join(' ') })),

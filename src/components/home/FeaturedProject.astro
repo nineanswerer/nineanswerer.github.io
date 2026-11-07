@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { project: CollectionEntry<'projects'> }
+const { project } = Astro.props;
+const { data } = project;
+const href = `/projects/${project.id}/`;
+const { cover, titleLines = [data.title], eyebrow = 'SELECTED PROJECT' } = data.presentation;
+---
+<article class="featured-project" data-reveal>
+  <div class="featured-topline"><span class="index-label">FEATURED PROJECT — 01</span><span class="feature-status"><span aria-hidden="true"></span>{data.status}</span></div>
+  <div class="featured-project-grid">
+    <div class="featured-project-copy">
+      <span class="project-category">{eyebrow}</span>
+      <h3>{titleLines.map((line, index) => <Fragment>{index > 0 && <br />}{index === 0 ? line : <span>{line}</span>}</Fragment>)}<span class="feature-title-dot">.</span></h3>
+      <p class="featured-tagline">{data.tagline}</p>
+      <p class="featured-description">{data.description}</p>
+      <div class="making-links"><a class="featured-entry" href={href}>探索这个项目 <span aria-hidden="true">↗</span></a>{data.release && <a class="feature-release" href={data.release} target="_blank" rel="noreferrer">获取发布版 ↗</a>}</div>
+    </div>
+    <a class:list={['featured-visual', { 'generic-art': !cover }]} href={href} aria-label={`查看 ${data.title} 项目`} data-hover-art>
+      <div class="scene-grid" aria-hidden="true"></div><div class="scene-bracket bracket-top" aria-hidden="true"></div>
+      {cover ? <img src={cover.src} width={cover.width} height={cover.height} alt={cover.alt} loading="lazy" /> : <span class="generic-glyph" aria-hidden="true">↗</span>}
+      <span class="scene-label">{eyebrow}<br /><span>{data.title}</span></span>
+      <span class="scene-view">探索项目 <span aria-hidden="true">↗</span></span>
+    </a>
+  </div>
+  <div class="featured-project-bottom"><div><span class="index-label">我的职责</span><p>{data.role}</p></div><div><span class="index-label">项目实现</span><p>{data.stack.join(' · ')}</p></div>{cover?.note && <span class="image-disclosure">{cover.note}</span>}</div>
+</article>
