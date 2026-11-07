@@ -20,7 +20,7 @@ const leadPost = posts[0];
 ---
 <BaseLayout bodyClass="experimental-page">
   <div class="editorial-home">
-    <section class="manifesto shell" aria-labelledby="home-title">
+    <section class="manifesto" aria-labelledby="home-title">
       <div class="manifesto-top"><span class="index-label">NINEANSWERER / A WORKSHOP IN MOTION</span><span class="index-label"><span class="live-mark" aria-hidden="true"></span>个人项目 · 生成式视觉 · 持续探索</span></div>
       <div class="manifesto-grid">
         <div class="manifesto-copy">
@@ -39,7 +39,7 @@ const leadPost = posts[0];
 
     <div class="kinetic-band" aria-hidden="true" data-kinetic-band><div class="kinetic-band-track"><span>CURIOSITY</span><i>↗</i><span class="band-outline">CODE</span><i>×</i><span>CRAFT</span><i>↗</i><span class="band-outline">CURIOSITY</span><i>×</i><span>CODE</span></div></div>
 
-    <section class="selected-work shell making-section" id="selected-work" aria-labelledby="work-title">
+    <section class="selected-work making-section" id="selected-work" aria-labelledby="work-title">
       <div class="editorial-section-head"><div><span class="index-label">01 / SELECTED WORK</span><h2 id="work-title">从问题出发<span class="accent-dot">.</span></h2></div><span class="section-side-note">{total} 个项目，持续生长。<br />每件作品，都有来处。</span></div>
       {featured && <FeaturedProject project={featured} />}
       {selected.length > 0 && <div class="project-pair">{selected.map((project, index) => <ProjectCard project={project} index={index} />)}</div>}
@@ -47,7 +47,7 @@ const leadPost = posts[0];
       <div class="work-index-link"><span class="index-label">所有项目均保留职责与贡献说明</span><a class="editorial-link" href="/projects/">打开完整项目架 ↗</a></div>
     </section>
 
-    <section class="journal-section shell" id="journal" aria-labelledby="journal-title">
+    <section class="journal-section" id="journal" aria-labelledby="journal-title">
       <div class="editorial-section-head"><div><span class="index-label">02 / FIELD NOTES</span><h2 id="journal-title">做过，也写下来<span class="accent-dot">.</span></h2></div><a class="editorial-link" href="/writing/">全部写作 ↗</a></div>
       {leadPost && <div class="journal-grid">
         <article class="journal-feature" data-reveal><a href={leadPost.url}>
@@ -61,8 +61,8 @@ const leadPost = posts[0];
       {!leadPost && notes.length === 0 && <p class="content-empty">记录正在整理，先去看看作品。</p>}
     </section>
 
-    <section class="about-statement shell" aria-labelledby="about-statement-title" data-reveal>
-      <span class="index-label">03 / THE PERSON BEHIND</span><div class="about-statement-grid"><h2 id="about-statement-title">{home.about.heading[0]}<br />{home.about.heading[1]}</h2><div><p>{home.about.text}</p><p class="about-collaboration">{home.about.collaboration}</p><a class="editorial-link" href="/about/">多了解一点九术 ↗</a></div></div>
+    <section class="about-statement" aria-labelledby="about-statement-title">
+      <span class="index-label">03 / THE PERSON BEHIND</span><div class="about-statement-grid" data-reveal><h2 id="about-statement-title">{home.about.heading[0]}<br />{home.about.heading[1]}</h2><div><p>{home.about.text}</p><p class="about-collaboration">{home.about.collaboration}</p><a class="editorial-link" href="/about/">多了解一点九术 ↗</a></div></div>
     </section>
   </div>
 </BaseLayout>

@@ -140,7 +140,9 @@ export function mountSculpture(root: HTMLElement) {
   function resize() {
     const bounds = stage!.getBoundingClientRect();
     width = Math.max(1, bounds.width); height = Math.max(1, bounds.height);
-    ratio = Math.min(window.devicePixelRatio || 1, finePointer.matches ? 1.5 : 1.25);
+    // The canvas extends past the viewport, so cap the backing buffer on wide displays.
+    const pixelBudget = 2_000_000;
+    ratio = Math.min(window.devicePixelRatio || 1, finePointer.matches ? 1.5 : 1.25, Math.sqrt(pixelBudget / (width * height)));
     canvas!.width = Math.round(width * ratio); canvas!.height = Math.round(height * ratio);
     render(); start();
   }
