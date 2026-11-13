@@ -3,7 +3,6 @@ export function mountHomeMotion(root: HTMLElement) {
   const { signal } = lifetime;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const pointer = matchMedia('(hover: hover) and (pointer: fine)');
-  const hero = root.querySelector<HTMLElement>('.manifesto');
   const band = root.querySelector<HTMLElement>('[data-kinetic-band]');
   let frame = 0;
   const reveal = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
@@ -16,7 +15,6 @@ export function mountHomeMotion(root: HTMLElement) {
     frame = 0;
     const fullHeight = document.documentElement.scrollHeight - innerHeight;
     document.documentElement.style.setProperty('--reading-progress', String(fullHeight > 0 ? scrollY / fullHeight : 0));
-    hero?.style.setProperty('--hero-drift', `${reduced.matches ? 0 : Math.min(scrollY, 900) * .1}px`);
     band?.style.setProperty('--band-shift', `${reduced.matches ? 0 : Math.max(-320, Math.min(100, (band.getBoundingClientRect().top - innerHeight) * .2))}px`);
   }
   function schedule() { if (!frame) frame = requestAnimationFrame(scroll); }

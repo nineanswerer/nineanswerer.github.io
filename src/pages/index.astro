@@ -8,6 +8,7 @@ import ProjectCard from '../components/home/ProjectCard.astro';
 import '../styles/home.css';
 import { formatDate } from '../utils';
 import KineticSculpture from '../components/KineticSculpture.astro';
+import { buildProjectGrowth } from '../project-growth';
 
 const [projects, homeEntry] = await Promise.all([getPublishedProjects(), getEntry('home', 'index')]);
 if (!homeEntry) throw new Error('缺少首页配置：src/content/home/index.json');
@@ -17,6 +18,7 @@ const feed = await getFeedItems();
 const posts = feed.filter((item) => item.type === '长文');
 const notes = feed.filter((item) => item.type === '碎片');
 const leadPost = posts[0];
+const growth = buildProjectGrowth(projects, posts, home.projectsLimit);
 ---
 <BaseLayout bodyClass="experimental-page">
   <div class="editorial-home">
@@ -28,7 +30,7 @@ const leadPost = posts[0];
           <h1 id="home-title"><span>{home.heading[0]}<span class="hero-comma">，</span></span><span class="title-accent">{home.heading[1]}<span class="title-period">。</span></span></h1>
           <div class="manifesto-intro"><span class="intro-arrow" aria-hidden="true">↳</span><p>{home.intro}</p></div>
         </div>
-        <KineticSculpture enabled={home.visual.enabled} autoplay={home.visual.autoplay} />
+        <KineticSculpture enabled={home.visual.enabled} autoplay={home.visual.autoplay} graph={growth} />
       </div>
       <div class="manifesto-bottom">
         <a class="hero-project-link" href="#selected-work"><span>探索作品</span><span class="round-action" aria-hidden="true">↓</span></a>

@@ -4,6 +4,7 @@ import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { chromium } from 'playwright-core';
+import { checkProjectGrowth } from './project-growth-ui.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = path.join(root, 'dist');
@@ -98,6 +99,7 @@ try {
     '/projects/', '/projects/storagescope/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
   ];
+  await checkProjectGrowth({ page, browser, base, output, checks });
   for (const width of [1440, 768, 390, 375]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of routes) {

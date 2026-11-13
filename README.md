@@ -91,6 +91,7 @@ presentation:
 src/content.config.ts           内容 schema，构建时校验
 src/content.ts                  统一公开项目与写作查询
 src/home-model.ts               重点选择、排序、数量限制
+src/project-growth.ts           公开记录选择与稳定的项目分支几何
 src/pages/index.astro           首页内容编排
 src/components/home/            可复用的重点项目与项目卡片
 src/components/KineticSculpture.astro  可开关的视觉组件
@@ -108,9 +109,11 @@ scripts/verify-build.mjs         静态链接、资源和首页体积检查
 ## 动效与性能约束
 
 - 首页 `visual.enabled: false` 显示静态构成；`autoplay: false` 关闭默认旋转。
-- 无 JavaScript 或 Canvas 不可用时，文字、导航、项目和 CSS 构成都可用，交互按钮不会误导访客。
+- 生长图复用公开项目的 `updates` 和关联长文；按项目排序，每支最多保留最近 6 条。文章修订明确标记，不从项目日期推断立项或发布。节点顺序代表日期先后，间距不代表时长。普通项目记录不补造里程碑。
+- 无 JavaScript 或 Canvas 不可用时，静态 SVG、记录目录和普通链接仍可用，交互按钮保持隐藏。
 - 尊重系统减少动态效果设置，页面打开期间更改偏好也会生效。暂停状态在当前浏览器会话内记忆。
 - 雕塑离屏或标签页隐藏时停止循环；组件释放时移除监听器和观察器。移动端使用较少网格与较低帧率上限。
+- 点击节点或项目、使用记录前后按钮时暂停转动；记录目录支持直接跳转，Canvas 可用方向键旋转、Home 复位。手机纵向手势滚动页面，横向拖动旋转。
 - 不引入动效框架、全屏视频或第三方运行接口。首页初始脚本预算为 **12 KiB gzip**，CSS 为 **18 KiB gzip**。检查统计 HTML 引用和内联的脚本、样式；不是 FPS、Lighthouse 或整站图片体积的测量。
 
 ## 验证与发布

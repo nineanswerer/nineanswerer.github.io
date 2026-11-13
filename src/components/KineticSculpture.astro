@@ -1,15 +1,56 @@
 ---
-interface Props { enabled?: boolean; autoplay?: boolean }
-const { enabled = true, autoplay = true } = Astro.props;
+import { branchPoint, growthCamera, projectPoint, recordProgress, type GrowthGraph } from '../project-growth';
+interface Props { enabled?: boolean; autoplay?: boolean; graph: GrowthGraph }
+const { enabled = true, autoplay = true, graph } = Astro.props;
+const initial = graph.branches.reduce((latest, branch, index) => {
+  const record = branch.records.at(-1);
+  return record && (!latest || record.date > graph.branches[latest.branch].records[latest.record].date)
+    ? { branch: index, record: branch.records.length - 1 } : latest;
+}, undefined as { branch: number; record: number } | undefined);
+const activeBranch = initial && graph.branches[initial.branch];
+const activeRecord = activeBranch && activeBranch.records[initial!.record];
+const camera = growthCamera(graph.branches.length, 0, -.24, 0, 640, 420);
+const point = (branch: number, t: number) => projectPoint(branchPoint(branch, graph.branches.length, t), -.24, 0, 640, 420, camera);
+const path = (branch: number) => Array.from({ length: 33 }, (_, i) => {
+  const p = point(branch, i / 32); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+}).join(' ');
 ---
-<figure class="kinetic-sculpture" data-sculpture={enabled ? '' : undefined} data-autoplay={autoplay} data-shape="knot" aria-labelledby="sculpture-caption">
+<figure class="kinetic-sculpture" data-sculpture={enabled && graph.branches.length ? '' : undefined} data-autoplay={autoplay} data-growth={JSON.stringify(graph)} aria-labelledby="sculpture-caption">
+  <div class="growth-heading"><span>PROJECT GROWTH / 项目生长图</span><span>{graph.branches.length} 条分支{graph.latest && <> · <time datetime={graph.latest}>{graph.latest}</time></>}</span></div>
   <div class="sculpture-stage">
-    <div class="sculpture-fallback" aria-hidden="true"><span></span><span></span><span></span></div>
-    {enabled && <canvas data-sculpture-canvas aria-label="可交互的蓝色结状雕塑" aria-describedby="sculpture-instruction"></canvas>}
-    <span class="sculpture-cross sculpture-cross-start" aria-hidden="true">+</span><span class="sculpture-cross sculpture-cross-end" aria-hidden="true">+</span>
-    <span class="sculpture-coordinate" aria-hidden="true">X / Y / Z<br />FORM IN MOTION</span>
+    <svg class="sculpture-fallback" viewBox="0 0 640 420" aria-hidden="true">
+      {graph.branches.map((branch, index) => <g>
+        <path d={path(index)} fill="none" stroke="#6082ff" stroke-width="8" stroke-linecap="round" />
+        {branch.records.map((record, recordIndex) => {
+          const p = point(index, recordProgress(recordIndex, branch.records.length));
+          return <circle cx={p.x} cy={p.y} r="6" fill={record.date === graph.latest ? '#dafa88' : '#dce5ff'} />;
+        })}
+        <text x={point(index, 1).x + 12} y={point(index, 1).y} fill="#dce5ff" font-size="14">{String(index + 1).padStart(2, '0')}</text>
+      </g>)}
+    </svg>
+    {enabled && graph.branches.length > 0 && <canvas data-sculpture-canvas aria-label="项目生长图：每条分支代表一个项目，每个节点代表一条公开记录" aria-describedby="sculpture-instruction"></canvas>}
+    {!graph.branches.length && <p class="growth-empty">第一条项目记录，将从这里生长。</p>}
   </div>
-  <figcaption id="sculpture-caption"><span><b>FORM STUDY / 001</b><span class="sculpture-instruction" id="sculpture-instruction">{enabled ? '拖动或用方向键旋转' : '从形状读结构 · 静态构成'}</span></span>{enabled && <div class="sculpture-controls" hidden><button type="button" data-sculpture-shape aria-pressed="false">展开结构 <span aria-hidden="true">↗</span></button><button type="button" data-sculpture-pause aria-pressed="false">暂停转动 <span aria-hidden="true">Ⅱ</span></button></div>}</figcaption>
+  <figcaption id="sculpture-caption">
+    <span id="sculpture-instruction">分支是项目，节点是记录。<br /><span class="sculpture-instruction">由内向外按日期排列 · 浅绿标记最近更新</span><span class="sculpture-instruction" data-runtime-hint hidden>拖动或方向键旋转 · 轻点节点查看</span></span>
+    {enabled && graph.branches.length > 0 && <div class="sculpture-controls" hidden><button type="button" data-sculpture-shape aria-pressed="false">展开分支 ↗</button><button type="button" data-sculpture-pause aria-pressed="false">暂停转动 Ⅱ</button></div>}
+  </figcaption>
+  {activeBranch && activeRecord && <>
+    <div class="growth-projects" role="group" aria-label="选择项目分支" hidden>
+      {graph.branches.map((branch, index) => <button type="button" data-growth-project={index} aria-pressed={index === initial!.branch}><span>{String(index + 1).padStart(2, '0')}</span>{branch.title}</button>)}
+    </div>
+    <div class="growth-detail" aria-live="polite" aria-atomic="true">
+      <div class="growth-detail-meta"><a data-growth-project-link href={activeBranch.url}>{activeBranch.title}</a><span><time data-growth-date datetime={activeRecord.date}>{activeRecord.date}</time> · <span data-growth-kind>{activeRecord.kind}</span></span></div>
+      <h2><a data-growth-title href={activeRecord.url}>{activeRecord.title} ↗</a></h2>
+      <p data-growth-description>{activeRecord.description}</p>
+      <div class="growth-record-nav" hidden><span data-growth-counter></span><div><button type="button" data-growth-previous aria-label="查看上一条记录">←</button><button type="button" data-growth-next aria-label="查看下一条记录">→</button></div></div>
+    </div>
+    <details class="growth-records-index">
+      <summary>浏览公开记录 <span aria-hidden="true">＋</span></summary>
+      <p>每个项目最多展示最近 6 条里程碑与文章，间距不代表时长或项目质量。完整内容见项目页。</p>
+      {graph.branches.map((branch, index) => <section><h3><a href={branch.url}>{String(index + 1).padStart(2, '0')} / {branch.title}</a><span>{branch.records.length} / {branch.total} 条</span></h3><ol>{branch.records.map(record => <li><a href={record.url} data-growth-record={record.id}><time datetime={record.date}>{record.date}</time><span>{record.title}</span><small>{record.kind} ↗</small></a></li>)}</ol></section>)}
+    </details>
+  </>}
 </figure>
 <script>
   import { mountSculpture } from '../scripts/sculpture';

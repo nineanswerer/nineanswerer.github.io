@@ -1,17 +1,12 @@
-type Vector = [number, number, number];
-type Vertex = { knot: Vector; ring: Vector; normal: Vector; ringNormal: Vector };
-type Projected = { x: number; y: number; z: number; nx: number; ny: number; nz: number };
-const TAU = Math.PI * 2;
-const normalise = ([x, y, z]: Vector): Vector => {
-  const length = Math.hypot(x, y, z) || 1;
-  return [x / length, y / length, z / length];
-};
-const cross = (a: Vector, b: Vector): Vector => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-const centre = (t: number): Vector => {
-  const r = 2 + .62 * Math.cos(3 * t);
-  return [r * Math.cos(2 * t), r * Math.sin(2 * t), .94 * Math.sin(3 * t)];
-};
+import { branchPoint, growthCamera, projectPoint, recordProgress, rotatePoint, type GrowthGraph, type Vector } from '../project-growth';
 
+type SurfacePoint = { compact: Vector; spread: Vector; normal: Vector; spreadNormal: Vector };
+type Face = { vertices: SurfacePoint[]; branch: number };
+type Hit = { x: number; y: number; z: number; branch: number; record: number };
+const TAU = Math.PI * 2;
+const normalise = (v: Vector): Vector => { const n = Math.hypot(...v) || 1; return [v[0] / n, v[1] / n, v[2] / n]; };
+const cross = (a: Vector, b: Vector): Vector => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const mix = (a: Vector, b: Vector, t: number): Vector => a.map((value, i) => value + (b[i] - value) * t) as Vector;
 const mounted = new WeakMap<HTMLElement, () => void>();
 
 export function mountSculpture(root: HTMLElement) {
@@ -21,195 +16,285 @@ export function mountSculpture(root: HTMLElement) {
   const shapeButton = root.querySelector<HTMLButtonElement>('[data-sculpture-shape]');
   const pauseButton = root.querySelector<HTMLButtonElement>('[data-sculpture-pause]');
   if (!canvas || !stage || !shapeButton || !pauseButton) return;
+  let graph: GrowthGraph;
+  try { graph = JSON.parse(root.dataset.growth || '{}'); } catch { return; }
+  if (!graph.branches?.length) return;
   const context = canvas.getContext('2d', { alpha: true });
-  if (!context) {
-    shapeButton.disabled = true;
-    pauseButton.disabled = true;
-    return;
-  }
+  if (!context) return;
   const ctx = context;
   const lifetime = new AbortController();
   const { signal } = lifetime;
-  const controls = root.querySelector<HTMLElement>('.sculpture-controls');
-  if (controls) controls.hidden = false;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const finePointer = window.matchMedia('(pointer: fine)');
-  const segments = finePointer.matches ? 144 : 72;
-  const sides = finePointer.matches ? 12 : 10;
-  const frameInterval = finePointer.matches ? 1000 / 30 : 1000 / 24;
-  const vertices: Vertex[] = [];
-  const faces: [number, number, number, number][] = [];
-  for (let i = 0; i < segments; i++) {
-    const t = i / segments * TAU;
-    const c = centre(t);
-    const ahead = centre(t + .001);
-    const tangent = normalise([ahead[0] - c[0], ahead[1] - c[1], ahead[2] - c[2]]);
-    const normal = normalise(cross(tangent, [0, 0, 1]));
-    const binormal = normalise(cross(tangent, normal));
-    for (let j = 0; j < sides; j++) {
-      const v = j / sides * TAU;
-      const n: Vector = [normal[0] * Math.cos(v) + binormal[0] * Math.sin(v), normal[1] * Math.cos(v) + binormal[1] * Math.sin(v), normal[2] * Math.cos(v) + binormal[2] * Math.sin(v)];
-      const ringN: Vector = [Math.cos(t) * Math.cos(v), Math.sin(t) * Math.cos(v), Math.sin(v)];
-      vertices.push({ knot: [c[0] + n[0] * .3, c[1] + n[1] * .3, c[2] + n[2] * .3], ring: [(2.1 + .43 * Math.cos(v)) * Math.cos(t), (2.1 + .43 * Math.cos(v)) * Math.sin(t), .43 * Math.sin(v)], normal: n, ringNormal: ringN });
-      const next = (i + 1) % segments;
-      faces.push([i * sides + j, next * sides + j, next * sides + (j + 1) % sides, i * sides + (j + 1) % sides]);
-    }
-  }
-  const projected: Projected[] = vertices.map(() => ({ x: 0, y: 0, z: 0, nx: 0, ny: 0, nz: 1 }));
-  const ordered = faces.map((indices) => ({ indices, z: 0 }));
-  let width = 1, height = 1, ratio = 1;
-  let rotationX = -.45, rotationY = .38, targetX = 0, targetY = 0;
-  let hoverX = 0, hoverY = 0;
-  let morph = 0, morphTarget = 0;
-  let dragging = false, pointerX = 0, pointerY = 0;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = matchMedia('(pointer: fine)');
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  const autoplay = root.dataset.autoplay !== 'false';
   let userPaused: boolean | undefined;
   try { const saved = sessionStorage.getItem('sculpture-paused'); if (saved !== null) userPaused = saved === 'true'; } catch { /* Storage is optional. */ }
-  const autoplay = root.dataset.autoplay !== 'false';
-  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   let paused = reduced.matches || !!connection?.saveData || (userPaused ?? !autoplay);
-  let visible = false, frame = 0, lastDraw = 0;
-  let previousTime = 0;
+  let width = 1, height = 1, ratio = 1, rotationX = -.24, rotationY = 0;
+  let camera = growthCamera(graph.branches.length, 0, rotationX, rotationY, width, height);
+  let expanded = 0, expandTarget = 0, visible = false, frame = 0, lastDraw = 0;
+  let hovered = -1, engaged = false, focused = false;
+  let pointer: { id: number; x: number; y: number; lastX: number; lastY: number; touch: boolean; moved: boolean } | undefined;
+  const introEnd = performance.now() + 1800;
+  const frameInterval = finePointer.matches ? 1000 / 30 : 1000 / 24;
+  const projectButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-growth-project]')];
+  const previous = root.querySelector<HTMLButtonElement>('[data-growth-previous]')!;
+  const next = root.querySelector<HTMLButtonElement>('[data-growth-next]')!;
+  const title = root.querySelector<HTMLAnchorElement>('[data-growth-title]')!;
+  const projectLink = root.querySelector<HTMLAnchorElement>('[data-growth-project-link]')!;
+  const date = root.querySelector<HTMLTimeElement>('[data-growth-date]')!;
+  const kind = root.querySelector<HTMLElement>('[data-growth-kind]')!;
+  const description = root.querySelector<HTMLElement>('[data-growth-description]')!;
+  const counter = root.querySelector<HTMLElement>('[data-growth-counter]')!;
+  let activeBranch = Math.max(0, graph.branches.findIndex(branch => branch.records.at(-1)?.date === graph.latest));
+  let activeRecord = graph.branches[activeBranch].records.length - 1;
+  let hits: Hit[] = [];
 
-  function rotate(x: number, y: number, z: number, ax: number, ay: number): Vector {
-    const cy = Math.cos(ay), sy = Math.sin(ay), cx = Math.cos(ax), sx = Math.sin(ax);
-    const px = x * cy + z * sy, pz = -x * sy + z * cy;
-    return [px, y * cx - pz * sx, y * sx + pz * cx];
+  function surface(branch: number, t: number, side: number, spread: number) {
+    const centre = branchPoint(branch, graph.branches.length, t, spread);
+    const ahead = branchPoint(branch, graph.branches.length, t + .001, spread);
+    const tangent = normalise(ahead.map((value, i) => value - centre[i]) as Vector);
+    const normal = normalise(cross(tangent, [0, 0, 1]));
+    const binormal = normalise(cross(tangent, normal));
+    const v = side * TAU;
+    const n = normal.map((value, i) => value * Math.cos(v) + binormal[i] * Math.sin(v)) as Vector;
+    return { point: centre.map((value, i) => value + n[i] * (.16 - .095 * t)) as Vector, normal: n };
+  }
+  const faces: Face[] = [];
+  const segments = finePointer.matches ? 36 : 24, sides = 8;
+  graph.branches.forEach((_, branch) => {
+    const rows = Array.from({ length: segments + 1 }, (__, i) => Array.from({ length: sides }, (___, j) => {
+      const compact = surface(branch, i / segments, j / sides, 0);
+      const spread = surface(branch, i / segments, j / sides, 1);
+      return { compact: compact.point, spread: spread.point, normal: compact.normal, spreadNormal: spread.normal };
+    }));
+    for (let i = 0; i < segments; i++) for (let j = 0; j < sides; j++) {
+      faces.push({ vertices: [rows[i][j], rows[i + 1][j], rows[i + 1][(j + 1) % sides], rows[i][(j + 1) % sides]], branch });
+    }
+  });
+
+  function project(v: Vector) { return projectPoint(v, rotationX, rotationY, width, height, camera); }
+  function updatePause() {
+    pauseButton!.setAttribute('aria-pressed', String(paused));
+    pauseButton!.textContent = paused ? '继续转动 ↻' : '暂停转动 Ⅱ';
+    root.dataset.paused = String(paused);
+  }
+  function choose(branch: number, record: number, reading = true) {
+    activeBranch = branch; activeRecord = record;
+    const selected = graph.branches[branch], item = selected.records[record];
+    projectButtons.forEach((button, index) => button.setAttribute('aria-pressed', String(index === branch)));
+    projectLink.textContent = selected.title; projectLink.href = selected.url;
+    title.textContent = `${item.title} ↗`; title.href = item.url;
+    date.textContent = item.date; date.dateTime = item.date; kind.textContent = item.kind;
+    description.textContent = item.description;
+    counter.textContent = `记录 ${record + 1} / ${selected.records.length}${selected.total > 6 ? ' · 最近 6 条' : ''}`;
+    previous.disabled = record === 0; next.disabled = record === selected.records.length - 1;
+    if (reading) { paused = true; stop(); updatePause(); }
+    render(); start();
   }
   function render() {
+    camera = growthCamera(graph.branches.length, expanded, rotationX, rotationY, width, height);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    const scale = Math.min(width, height) * .155;
-    const ax = rotationX + hoverY, ay = rotationY + hoverX;
-    for (let i = 0; i < vertices.length; i++) {
-      const point = vertices[i];
-      const x = point.knot[0] + (point.ring[0] - point.knot[0]) * morph;
-      const y = point.knot[1] + (point.ring[1] - point.knot[1]) * morph;
-      const z = point.knot[2] + (point.ring[2] - point.knot[2]) * morph;
-      const position = rotate(x, y, z, ax, ay);
-      const normal = rotate(point.normal[0] + (point.ringNormal[0] - point.normal[0]) * morph, point.normal[1] + (point.ringNormal[1] - point.normal[1]) * morph, point.normal[2] + (point.ringNormal[2] - point.normal[2]) * morph, ax, ay);
-      const perspective = 8 / (8 - position[2]);
-      const output = projected[i];
-      output.x = width * .5 + position[0] * scale * perspective;
-      output.y = height * .49 + position[1] * scale * perspective;
-      output.z = position[2];
-      output.nx = normal[0]; output.ny = normal[1]; output.nz = normal[2];
+    const origin = project([0, 1.25, 0]);
+    const glow = ctx.createRadialGradient(origin.x, origin.y, 0, origin.x, origin.y, width * .36);
+    glow.addColorStop(0, '#4267ff18'); glow.addColorStop(1, '#4267ff00');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height);
+    // A common origin denotes authorship; no invented links between projects.
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const a = i / 64 * TAU, p = project([.48 * Math.cos(a), 1.3, .48 * Math.sin(a)]);
+      if (!i) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
     }
-    for (const face of ordered) face.z = face.indices.reduce((total, index) => total + projected[index].z, 0) / 4;
-    ordered.sort((a, b) => a.z - b.z);
+    ctx.strokeStyle = '#7b91c65c'; ctx.lineWidth = 1; ctx.stroke();
+    const projected = faces.map(face => {
+      const points = face.vertices.map(vertex => project(mix(vertex.compact, vertex.spread, expanded)));
+      const normal = rotatePoint(mix(face.vertices[0].normal, face.vertices[0].spreadNormal, expanded), rotationX, rotationY);
+      return { ...face, points, normal, z: points.reduce((sum, p) => sum + p.z, 0) / points.length };
+    }).sort((a, b) => a.z - b.z);
     ctx.lineJoin = 'round';
-    for (const face of ordered) {
-      const [a, b, c, d] = face.indices.map(index => projected[index]);
-      const light = Math.max(0, (a.nx * -.35 + a.ny * -.6 + a.nz * .72));
-      const specular = Math.pow(Math.max(0, a.nz * .92 - a.ny * .3), 22);
-      const r = Math.min(255, 13 + light * 38 + specular * 158);
-      const g = Math.min(255, 26 + light * 65 + specular * 168);
-      const blue = Math.min(255, 104 + light * 141 + specular * 75);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.closePath();
-      ctx.fillStyle = morph > .75 ? `rgba(19,34,77,${.45 + light * .3})` : `rgb(${r|0},${g|0},${blue|0})`;
-      ctx.fill();
-      ctx.strokeStyle = morph > .5 ? `rgba(151,177,255,${.12 + light * .55})` : `rgba(101,135,255,${.08 + light * .18})`;
-      ctx.lineWidth = morph > .5 ? .65 : .4;
-      ctx.stroke();
+    for (const face of projected) {
+      const [nx, ny, nz] = face.normal;
+      const light = Math.max(0, nx * -.32 + ny * -.55 + nz * .75);
+      const specular = Math.pow(Math.max(0, nz * .88 - ny * .35), 20);
+      const selected = face.branch === activeBranch;
+      const r = 23 + light * (selected ? 45 : 40) + specular * 110;
+      const g = 42 + light * (selected ? 78 : 57) + specular * 115;
+      const b = (selected ? 159 : 103) + light * 80 + specular * 55;
+      ctx.beginPath(); face.points.forEach((p, i) => { if (!i) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); }); ctx.closePath();
+      ctx.fillStyle = `rgb(${r|0},${g|0},${Math.min(255, b)|0})`; ctx.fill();
+      ctx.strokeStyle = `rgba(123,157,255,${.12 + light * .22})`; ctx.lineWidth = .45; ctx.stroke();
     }
-    ctx.fillStyle = '#dafa88';
-    for (let i = 0; i < projected.length; i += sides * 12) {
-      const p = projected[i];
-      if (p.nz < .1) continue;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 1.4 + morph * .6, 0, TAU); ctx.fill();
-    }
+    hits = graph.branches.flatMap((branch, branchIndex) => branch.records.map((_, record) => ({
+      ...project(branchPoint(branchIndex, graph.branches.length, recordProgress(record, branch.records.length), expanded)), branch: branchIndex, record,
+    })));
+    const pulse = !paused && !reduced.matches && performance.now() < introEnd ? .5 + .5 * Math.sin(performance.now() / 180) : 0;
+    [...hits].sort((a, b) => a.z - b.z).forEach(hit => {
+      const item = graph.branches[hit.branch].records[hit.record];
+      const selected = hit.branch === activeBranch && hit.record === activeRecord;
+      const latest = item.date === graph.latest;
+      const radius = item.kind === '里程碑' ? 8 : 6.5;
+      if (selected || hits.indexOf(hit) === hovered || (latest && pulse)) {
+        ctx.beginPath(); ctx.arc(hit.x, hit.y, radius + 5 + (latest ? pulse * 3 : 0), 0, TAU);
+        ctx.strokeStyle = selected ? '#e5eeffcc' : '#dafa8866'; ctx.lineWidth = 1; ctx.stroke();
+      }
+      const gradient = ctx.createRadialGradient(hit.x - 2, hit.y - 2, 0, hit.x, hit.y, radius);
+      gradient.addColorStop(0, latest ? '#f1ffd3' : '#f3f6ff');
+      gradient.addColorStop(1, latest ? '#aaca63' : '#7895db');
+      ctx.beginPath(); ctx.arc(hit.x, hit.y, radius, 0, TAU); ctx.fillStyle = gradient; ctx.fill();
+    });
+    // Numbered tips correspond to the stationary project buttons beneath the canvas.
+    const labels: { x: number; y: number }[] = [];
+    graph.branches.forEach((_, index) => {
+      const tip = project(branchPoint(index, graph.branches.length, 1, expanded));
+      const candidates = [[0, -28], [0, 28], [-28, 0], [28, 0], [-28, -28], [28, -28], [0, -56], [0, 56]]
+        .map(([x, y]) => ({ x: Math.max(15, Math.min(width - 15, tip.x + x)), y: Math.max(15, Math.min(height - 15, tip.y + y)) }));
+      const label = candidates.find(p => labels.every(other => Math.hypot(other.x - p.x, other.y - p.y) > 29)) ?? candidates[0];
+      labels.push(label);
+      ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(label.x, label.y); ctx.strokeStyle = '#7389b55c'; ctx.lineWidth = .7; ctx.stroke();
+      ctx.font = '11px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.beginPath(); ctx.arc(label.x, label.y, 12, 0, TAU);
+      ctx.fillStyle = '#101214'; ctx.fill(); ctx.strokeStyle = index === activeBranch ? '#9cb1ff' : '#63759d'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = index === activeBranch ? '#e3eaff' : '#a0afcd'; ctx.fillText(String(index + 1).padStart(2, '0'), label.x, label.y);
+    });
+    ctx.font = '9px ui-monospace, monospace'; ctx.fillStyle = '#8d9ab5'; ctx.textAlign = 'center';
+    ctx.fillText('九术 / WORKSHOP', origin.x, Math.min(height - 14, origin.y + 27));
     root.classList.add('is-rendered');
   }
-  function stop() {
-    cancelAnimationFrame(frame); frame = 0; previousTime = 0;
-  }
+  function stop() { cancelAnimationFrame(frame); frame = 0; lastDraw = 0; }
+  function moving() { return (!paused && !engaged && !focused && !pointer) || Math.abs(expandTarget - expanded) > .0005; }
   function tick(time: number) {
     frame = 0;
     if (!visible || document.hidden) return;
-    const elapsed = previousTime ? Math.min((time - previousTime) / 1000, .06) : .033;
     if (time - lastDraw >= frameInterval) {
-      if (!paused && !dragging) { rotationY += elapsed * .21; rotationX += elapsed * .025; }
-      hoverX += (targetX - hoverX) * .08;
-      hoverY += (targetY - hoverY) * .08;
-      morph += (morphTarget - morph) * (reduced.matches ? 1 : .09);
-      if (Math.abs(morphTarget - morph) < .0005) morph = morphTarget;
-      render(); lastDraw = time; previousTime = time;
+      const elapsed = lastDraw ? Math.min((time - lastDraw) / 1000, .08) : .033;
+      if (!paused && !engaged && !focused && !pointer) rotationY += elapsed * .11;
+      expanded += (expandTarget - expanded) * (reduced.matches ? 1 : 1 - Math.exp(-elapsed * 14));
+      if (Math.abs(expandTarget - expanded) < .0005) expanded = expandTarget;
+      render(); lastDraw = time;
     }
-    if (!paused || dragging || Math.abs(morphTarget - morph) > .0005 || Math.abs(targetX - hoverX) + Math.abs(targetY - hoverY) > .002) frame = requestAnimationFrame(tick);
+    if (moving()) frame = requestAnimationFrame(tick);
   }
-  function start() { if (!frame && visible && !document.hidden) frame = requestAnimationFrame(tick); }
+  function start() { if (!signal.aborted && !frame && visible && !document.hidden && moving()) frame = requestAnimationFrame(tick); }
   function resize() {
     const bounds = stage!.getBoundingClientRect();
     width = Math.max(1, bounds.width); height = Math.max(1, bounds.height);
-    // The canvas extends past the viewport, so cap the backing buffer on wide displays.
-    const pixelBudget = 2_000_000;
-    ratio = Math.min(window.devicePixelRatio || 1, finePointer.matches ? 1.5 : 1.25, Math.sqrt(pixelBudget / (width * height)));
+    ratio = Math.min(devicePixelRatio || 1, finePointer.matches ? 1.5 : 1.25, Math.sqrt(1_500_000 / (width * height)));
     canvas!.width = Math.round(width * ratio); canvas!.height = Math.round(height * ratio);
     render(); start();
   }
-  function updatePause() {
-    pauseButton!.setAttribute('aria-pressed', String(paused));
-    pauseButton!.innerHTML = paused ? '继续转动 <span aria-hidden="true">↻</span>' : '暂停转动 <span aria-hidden="true">Ⅱ</span>';
-    root.dataset.paused = String(paused);
+  function pick(x: number, y: number, touch = false) {
+    const bounds = canvas!.getBoundingClientRect();
+    const px = x - bounds.left, py = y - bounds.top;
+    return hits.map((hit, index) => ({ index, distance: Math.hypot(px - hit.x, py - hit.y), z: hit.z }))
+      .filter(hit => hit.distance < (touch ? 26 : 20)).sort((a, b) => a.distance - b.distance || b.z - a.z)[0]?.index ?? -1;
   }
   shapeButton.addEventListener('click', () => {
-    morphTarget = morphTarget ? 0 : 1;
-    root.dataset.shape = morphTarget ? 'ring' : 'knot';
-    shapeButton.setAttribute('aria-pressed', String(!!morphTarget));
-    shapeButton.innerHTML = morphTarget ? '收拢雕塑 <span aria-hidden="true">↙</span>' : '展开结构 <span aria-hidden="true">↗</span>';
-    if (reduced.matches) { morph = morphTarget; render(); }
+    expandTarget = expandTarget ? 0 : 1;
+    shapeButton.setAttribute('aria-pressed', String(!!expandTarget));
+    shapeButton.textContent = expandTarget ? '收拢分支 ↙' : '展开分支 ↗';
+    root.dataset.shape = expandTarget ? 'spread' : 'growth';
+    if (expandTarget) { rotationX = -.24; rotationY = 0; }
+    if (reduced.matches) { expanded = expandTarget; render(); }
     start();
   }, { signal });
-  pauseButton.addEventListener('click', () => { paused = !paused; userPaused = paused; try { sessionStorage.setItem('sculpture-paused', String(paused)); } catch { /* Storage is optional. */ } updatePause(); if (paused) { stop(); render(); } else start(); }, { signal });
+  pauseButton.addEventListener('click', () => {
+    paused = !paused; userPaused = paused;
+    try { sessionStorage.setItem('sculpture-paused', String(paused)); } catch { /* Storage is optional. */ }
+    updatePause(); if (paused) { stop(); render(); } else start();
+  }, { signal });
+  projectButtons.forEach((button, branch) => button.addEventListener('click', () => choose(branch, graph.branches[branch].records.length - 1), { signal }));
+  previous.addEventListener('click', () => { if (activeRecord > 0) choose(activeBranch, activeRecord - 1); }, { signal });
+  next.addEventListener('click', () => { if (activeRecord < graph.branches[activeBranch].records.length - 1) choose(activeBranch, activeRecord + 1); }, { signal });
+  root.querySelectorAll<HTMLAnchorElement>('[data-growth-record]').forEach(link => {
+    link.addEventListener('focus', () => {
+      graph.branches.forEach((branch, i) => {
+        const record = branch.records.findIndex(item => item.id === link.dataset.growthRecord);
+        if (record >= 0) choose(i, record, false);
+      });
+    }, { signal });
+  });
+  root.addEventListener('focusin', (event) => {
+    focused = event.target === canvas || !!(event.target as HTMLElement).closest('.growth-detail a, .growth-records-index');
+    if (focused) stop(); else start();
+  }, { signal });
+  root.addEventListener('focusout', () => queueMicrotask(() => {
+    const active = document.activeElement;
+    focused = active === canvas || !!(active instanceof HTMLElement && active.closest('.growth-detail a, .growth-records-index'));
+    start();
+  }), { signal });
   canvas.tabIndex = 0;
-  canvas.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight ArrowUp ArrowDown');
+  canvas.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight ArrowUp ArrowDown Home');
   canvas.addEventListener('keydown', (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    const step = .18;
     switch (event.key) {
-      case 'ArrowLeft': rotationY -= step; break;
-      case 'ArrowRight': rotationY += step; break;
-      case 'ArrowUp': rotationX -= step; break;
-      case 'ArrowDown': rotationX += step; break;
+      case 'ArrowLeft': rotationY -= .18; break;
+      case 'ArrowRight': rotationY += .18; break;
+      case 'ArrowUp': rotationX -= .18; break;
+      case 'ArrowDown': rotationX += .18; break;
+      case 'Home': rotationX = -.24; rotationY = 0; break;
       default: return;
     }
-    event.preventDefault();
-    render();
+    event.preventDefault(); render();
   }, { signal });
-  canvas.addEventListener('pointerdown', (event) => {
+  canvas.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') { engaged = true; stop(); } }, { signal });
+  canvas.addEventListener('pointerdown', event => {
     if (event.button !== 0) return;
-    dragging = true; pointerX = event.clientX; pointerY = event.clientY;
-    canvas.setPointerCapture(event.pointerId); canvas.classList.add('is-dragging');
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY, touch: event.pointerType === 'touch', moved: false };
+    stop();
   }, { signal });
-  canvas.addEventListener('pointermove', (event) => {
-    if (dragging) {
-      rotationY += (event.clientX - pointerX) * .007; rotationX += (event.clientY - pointerY) * .007;
-      pointerX = event.clientX; pointerY = event.clientY;
-      render(); start();
-    } else if (finePointer.matches && !reduced.matches) {
-      const bounds = canvas.getBoundingClientRect();
-      targetX = ((event.clientX - bounds.left) / bounds.width - .5) * .35;
-      targetY = ((event.clientY - bounds.top) / bounds.height - .5) * -.25;
-      start();
+  canvas.addEventListener('pointermove', event => {
+    if (pointer && event.pointerId === pointer.id) {
+      const dx = event.clientX - pointer.x, dy = event.clientY - pointer.y;
+      if (!pointer.moved && Math.hypot(dx, dy) > 6 && (!pointer.touch || Math.abs(dx) > Math.abs(dy))) {
+        pointer.moved = true; canvas.setPointerCapture(event.pointerId); canvas.classList.add('is-dragging');
+      }
+      if (pointer.moved) {
+        rotationY += (event.clientX - pointer.lastX) * .007; rotationX += (event.clientY - pointer.lastY) * .007;
+        render();
+      }
+      pointer.lastX = event.clientX; pointer.lastY = event.clientY;
+    } else if (finePointer.matches) {
+      const hit = pick(event.clientX, event.clientY);
+      if (hit !== hovered) { hovered = hit; render(); }
+      canvas.style.cursor = hit >= 0 ? 'pointer' : 'grab';
+      const target = hits[hit];
+      canvas.title = target ? `${graph.branches[target.branch].title} · ${graph.branches[target.branch].records[target.record].title}` : '拖动或用方向键旋转，轻点节点查看记录';
     }
   }, { signal });
-  function release() { dragging = false; canvas!.classList.remove('is-dragging'); start(); }
-  canvas.addEventListener('pointerup', release, { signal }); canvas.addEventListener('pointercancel', release, { signal });
+  function release(event: PointerEvent) {
+    if (!pointer || pointer.id !== event.pointerId) return;
+    if (event.type === 'pointerup' && !pointer.moved) {
+      const hit = hits[pick(event.clientX, event.clientY, pointer.touch)];
+      if (hit) choose(hit.branch, hit.record);
+    }
+    pointer = undefined; canvas!.classList.remove('is-dragging');
+    if (canvas!.hasPointerCapture(event.pointerId)) canvas!.releasePointerCapture(event.pointerId);
+    start();
+  }
+  canvas.addEventListener('pointerup', release, { signal });
+  canvas.addEventListener('pointercancel', release, { signal });
   canvas.addEventListener('lostpointercapture', release, { signal });
-  canvas.addEventListener('pointerleave', () => { targetX = 0; targetY = 0; start(); }, { signal });
+  canvas.addEventListener('pointerleave', () => { engaged = false; hovered = -1; render(); start(); }, { signal });
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); }, { signal });
-  reduced.addEventListener('change', () => { paused = reduced.matches || (userPaused ?? !autoplay) || !!connection?.saveData; morph = morphTarget; targetX = targetY = 0; hoverX = hoverY = 0; updatePause(); stop(); render(); start(); }, { signal });
-  const observer = 'IntersectionObserver' in window ? new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) start(); else stop(); }, { rootMargin: '60px' }) : undefined;
-  if (observer) observer.observe(root); else visible = true;
+  reduced.addEventListener('change', () => {
+    paused = reduced.matches || !!connection?.saveData || (userPaused ?? !autoplay);
+    expanded = expandTarget; updatePause(); stop(); render(); start();
+  }, { signal });
+  const observer = 'IntersectionObserver' in window ? new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting; if (visible) start(); else stop();
+  }) : undefined;
+  if (observer) observer.observe(stage); else visible = true;
   const sizing = 'ResizeObserver' in window ? new ResizeObserver(resize) : undefined;
   sizing?.observe(stage);
   if (!sizing) window.addEventListener('resize', resize, { signal, passive: true });
+  root.querySelectorAll<HTMLElement>('.sculpture-controls, .growth-projects, .growth-record-nav, [data-runtime-hint]').forEach(element => { element.hidden = false; });
   const dispose = () => {
     stop(); lifetime.abort(); observer?.disconnect(); sizing?.disconnect();
-    canvas.removeAttribute('tabindex');
-    canvas.removeAttribute('aria-keyshortcuts');
-    mounted.delete(root);
+    canvas.removeAttribute('tabindex'); canvas.removeAttribute('aria-keyshortcuts'); mounted.delete(root);
   };
   mounted.set(root, dispose);
-  updatePause(); resize();
+  choose(activeBranch, activeRecord, false); updatePause(); resize();
   return dispose;
 }
