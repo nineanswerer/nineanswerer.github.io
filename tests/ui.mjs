@@ -93,7 +93,7 @@ try {
   });
 
   const routes = [
-    '/', '/writing/', '/writing/storagescope-3d-tree/', '/writing/storagescope-beta-closure/',
+    '/', '/writing/', '/writing/storagescope-live-workspace/', '/writing/storagescope-3d-tree/', '/writing/storagescope-beta-closure/',
     '/writing/storagescope-trusted-cleanup/', '/writing/hugo-to-astro-casebook/', '/notes/visible-node-budget/',
     '/projects/', '/projects/storagescope/', '/projects/minecraft-resource-extractor/',
     '/now/', '/about/', '/search/',
@@ -120,6 +120,8 @@ try {
       assert.deepEqual(brokenImages, [], `${route} has broken images`);
       const distortedImages = await page.locator('img').evaluateAll((images) => images.flatMap((image) => {
         if (!image.offsetWidth || !image.offsetHeight || !image.naturalWidth || !image.naturalHeight) return [];
+        // These modes preserve the image ratio inside a deliberately cropped or letterboxed box.
+        if (['cover', 'contain', 'scale-down', 'none'].includes(getComputedStyle(image).objectFit)) return [];
         const displayedRatio = image.offsetWidth / image.offsetHeight;
         const naturalRatio = image.naturalWidth / image.naturalHeight;
         return Math.abs(displayedRatio - naturalRatio) / naturalRatio > 0.01 ? [`${image.getAttribute('src')}: displayed ${image.offsetWidth}×${image.offsetHeight}, natural ${image.naturalWidth}×${image.naturalHeight}`] : [];
@@ -141,9 +143,9 @@ try {
   assert.ok((await page.locator('.hero-status').textContent())?.includes(homeSettings.status));
   assert.ok((await page.locator('.making-section').textContent())?.includes('v0.3.0-beta.2'));
   assert.equal(await page.locator('.making-links a[href="https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"]').count(), 1);
-  assert.ok((await page.locator('.journal-list').textContent())?.includes('StorageScope Beta 结项'));
+  assert.ok((await page.locator('.journal-feature').textContent())?.includes('让目录变化在 3D 树里流动'));
   await page.screenshot({ path: path.join(output, 'home-1440.png'), fullPage: true });
-  checks.push('project-entry keyboard focus and beta closure summary');
+  checks.push('project-entry keyboard focus and live workspace summary');
 
   await page.goto(`${base}/writing/`, { waitUntil: 'networkidle' });
   feedCounts = { posts: await page.locator('[data-feed-kind="长文"]').count(), notes: await page.locator('[data-feed-kind="碎片"]').count(), total: await page.locator('[data-feed-kind]').count() };
@@ -174,7 +176,8 @@ try {
   assert.ok(page.url().includes('q='), 'Search should update the query parameter');
   await page.locator('#search-input').fill('definitely-no-such-record');
   assert.ok((await page.locator('#search-results').textContent())?.includes('没有找到'));
-  await page.locator('#search-input').fill('目录树');
+  await page.locator('#search-input').fill('单次流动尾迹');
+  assert.ok((await page.locator('#search-results').textContent())?.includes('让目录变化在 3D 树里流动'));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: path.join(output, 'search-390.png'), fullPage: true });
   checks.push('local search finds notes, empty state and query URL');
@@ -196,15 +199,35 @@ try {
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('307,630'));
   assert.ok((await page.locator('.project-evidence').textContent())?.includes('自动化运行记录'));
-  assert.ok((await page.locator('.project-evidence').textContent())?.includes('57 + 8 + 20'));
-  assert.ok((await page.locator('.project-hero').textContent())?.includes('v0.3.0-beta.2 已发布'));
+  assert.ok((await page.locator('.project-evidence').textContent())?.includes('61 + 10 + 34'));
+  assert.ok((await page.locator('.project-hero').textContent())?.includes('3D 实时工作区开发预览'));
   assert.equal(await page.locator('.project-hero a[href="https://github.com/nineanswerer/StorageScope/releases/tag/v0.3.0-beta.2"]').count(), 1);
   await page.screenshot({ path: path.join(output, 'project-390.png'), fullPage: true });
-  checks.push('mobile blog, project evidence and current beta release');
+  checks.push('mobile blog, preview evidence and existing public beta release');
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${base}/projects/storagescope/`, { waitUntil: 'networkidle' });
+  const demo = page.locator('.interface-video');
+  const videoSettings = await demo.evaluate((video) => ({ autoplay: video.autoplay, controls: video.controls, preload: video.preload, paused: video.paused, poster: video.poster }));
+  assert.deepEqual({ ...videoSettings, poster: undefined }, { autoplay: false, controls: true, preload: 'none', paused: true, poster: undefined });
+  assert.equal((await page.request.get(videoSettings.poster)).status(), 200, 'Demo poster should load');
+  for (const source of await demo.locator('source').all()) {
+    assert.equal((await page.request.get(`${base}${await source.getAttribute('src')}`)).status(), 200, 'Both video formats should load');
+  }
+  await demo.evaluate((video) => video.play());
+  await page.waitForFunction(() => document.querySelector('video')?.currentTime > 0.1);
+  await demo.evaluate((video) => { if (video instanceof HTMLVideoElement) video.pause(); });
+  assert.equal(await demo.evaluate((video) => video.paused), true);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload({ waitUntil: 'networkidle' });
+  assert.equal(await demo.evaluate((video) => video.paused), true, 'Demo should stay paused with reduced motion');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  checks.push('native demo formats, playback controls and paused default with reduced motion');
   await page.screenshot({ path: path.join(output, 'project-1440.png'), fullPage: true });
+  await page.goto(`${base}/writing/storagescope-live-workspace/`, { waitUntil: 'networkidle' });
+  assert.ok((await page.locator('.prose').textContent())?.includes('105 项'));
+  assert.ok((await page.locator('.prose').textContent())?.includes('新交互尚未发布到公开 Release'));
+  await page.screenshot({ path: path.join(output, 'storagescope-live-workspace-1440.png'), fullPage: true });
   await page.goto(`${base}/writing/storagescope-beta-closure/`, { waitUntil: 'networkidle' });
   const closureText = await page.locator('.prose').textContent();
   assert.ok(closureText?.includes('57 项 Rust 核心测试、8 项桌面测试和 20 项前端模型测试'));
@@ -235,6 +258,7 @@ try {
   const rssText = await rss.text();
   assert.ok(rssText.includes('StorageScope'));
   assert.ok(rssText.includes('/writing/storagescope-beta-closure/'));
+  assert.ok(rssText.includes('/writing/storagescope-live-workspace/'));
   assert.ok(rssText.includes('/notes/date-timezone/'));
   assert.ok((rssText.match(/<item>/g) ?? []).length === feedCounts.total, 'RSS should contain every published feed item');
   const sitemap = await page.request.get(`${base}/sitemap-0.xml`);
@@ -281,8 +305,8 @@ try {
   assert.equal((adminConfig.match(/widget: datetime, type: date, format: YYYY-MM-DD/g) ?? []).length, 8, 'All admin dates must use Day.js tokens');
   assert.ok(!adminConfig.includes('format: yyyy-MM-dd'), 'Admin must not use date-fns tokens');
   assert.ok(adminConfig.includes('omit_empty_optional_fields: true'), 'Admin should omit empty optional fields');
-  assert.equal((adminConfig.match(/name: draft, widget: boolean, default: true/g) ?? []).length, 2, 'New writing and notes should remain drafts by default');
-  assert.equal((adminConfig.match(/label: 仅保存为草稿/g) ?? []).length, 2, 'Draft controls should explain the save workflow');
+  assert.equal((adminConfig.match(/name: draft, widget: boolean, default: true/g) ?? []).length, 3, 'New writing, notes and projects should remain drafts by default');
+  assert.equal((adminConfig.match(/label: 仅保存为草稿/g) ?? []).length, 3, 'Draft controls should explain the save workflow');
   checks.push('admin date formats, empty optional fields and draft-first publishing');
 
   const adminHtml = await readFile(path.join(dist, 'admin/index.html'), 'utf8');

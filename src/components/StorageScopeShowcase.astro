@@ -5,20 +5,22 @@ const image = '/images/storagescope-tree.webp';
 ---
 <section class="interface-showcase" id="interface" aria-labelledby="interface-title">
   <div class="section-heading">
-    <div><span class="eyebrow">A CLOSER LOOK / 实际界面</span><h2 id="interface-title">先看一张图，再聊怎么做。</h2></div>
-    <span class="interface-source">真实应用截图 · 已隐去本机路径</span>
+    <div><span class="eyebrow">LIVE WORKSPACE / 开发预览</span><h2 id="interface-title">看见目录，也看见变化。</h2></div>
+    <span class="interface-source">真实桌面录制 · 隔离样本 · 无私人路径</span>
   </div>
   <figure class="interface-figure">
-    <a class="interface-image" href={image} target="_blank" rel="noreferrer" aria-label="在新标签页打开 StorageScope 完整截图">
-      <img src={image} alt="StorageScope 的实际三维目录树：目录节点沿父子连线展开，Packages 与 Media 标签标出部分分支" width="1384" height="841" loading="lazy" />
-      <span class="interface-enlarge">查看大图 ↗</span>
-    </a>
-    <figcaption>图中的文件夹、连线与标签，分别承担节点识别、层级关系与位置提示。此图用于说明结构表达。</figcaption>
+    <video class="interface-video" controls loop muted playsinline preload="none" poster="/images/storagescope-live-flow.webp" width="760" height="512" aria-label="StorageScope 开发预览：真实测试文件增长与缩减时，变化沿目录连线流动">
+      <source src="/media/storagescope-live-flow.webm" type="video/webm" />
+      <source src="/media/storagescope-live-flow.mp4" type="video/mp4" />
+      <a href="/media/storagescope-live-flow.mp4">打开目录变化演示</a>
+    </video>
+    <figcaption>点击播放：隔离目录中的真实文件增长、缩减触发尾迹和增减提示。页面默认静止，可随时暂停。演示来自开发预览；当前公开下载仍是 v0.3.0-beta.2。</figcaption>
   </figure>
   <ol class="interface-guide">
-    <li><span class="guide-number">01</span><div><h3>顺着连线，看目录层级</h3><p>先找到主要分支，理解目录之间的父子关系。</p></div></li>
-    <li><span class="guide-number">02</span><div><h3>借助标签，确认位置</h3><p>标签提供名称线索，细节按当前阅读任务呈现。</p></div></li>
-    <li><span class="guide-number">03</span><div><h3>进入分支，继续定位</h3><p>应用支持点击下钻、Esc 返回与 R 重置。</p></div></li>
+    <li><span class="guide-number">01</span><div><h3>边扫描，边看结构</h3><p>目录树逐步出现，未完成的统计会明确标注。</p></div></li>
+    <li><span class="guide-number">02</span><div><h3>选中节点，直接定位</h3><p>详情、路径搜索和列表共用选择；双击进入，Esc 返回。</p></div></li>
+    <li><span class="guide-number">03</span><div><h3>变化发生时，再流动</h3><p>增长流入、缩减退回；尾迹只掠过一次，无变化时静止。</p></div></li>
   </ol>
-  <div class="interface-context"><p>该截图不展示扫描完整性或操作过程。大目录样本、验收条件与当前限制，见下方验证记录。</p>{articleUrl && <a class="text-link" href={articleUrl}>读图背后的设计取舍 →</a>}</div>
+  <div class="interface-context"><p>流动表达逻辑空间的增减量，不是磁盘吞吐率。<a href={image} target="_blank" rel="noreferrer">查看 Beta 目录树截图 ↗</a></p><a class="text-link" href="/writing/storagescope-live-workspace/">看本轮更新与验收 →</a></div>
+  {articleUrl && <p class="interface-source"><a href={articleUrl}>继续阅读目录树的结构取舍 →</a></p>}
 </section>

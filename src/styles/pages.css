@@ -85,6 +85,7 @@
 .interface-figure { margin: 0; }
 .interface-image { display: block; position: relative; border: 1px solid var(--line); background: #111315; }
 .interface-image img { width: 100%; }
+.interface-video { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #111315; }
 .interface-enlarge { position: absolute; right: 12px; bottom: 12px; padding: 7px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--blue-ink); font-size: 13px; }
 .interface-figure figcaption { padding-top: 12px; color: var(--muted); font-size: 13px; }
 .interface-guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 26px 0 0; padding: 24px 0 0; list-style: none; border-top: 1px dashed var(--line-strong); }
