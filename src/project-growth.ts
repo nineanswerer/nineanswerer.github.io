@@ -28,28 +28,40 @@ export function buildProjectGrowth(projects: Project[], articles: Article[], lim
       description: data.description, kind: '项目记录', url });
     // Same-day articles and milestones remain distinct records.
     records.sort((a, b) => a.date.localeCompare(b.date) || Number(a.kind === '里程碑') - Number(b.kind === '里程碑') || a.id.localeCompare(b.id, 'en'));
-    return { id, title: data.title, url, status: data.status, records: records.slice(-6), total: records.length };
+    return { id, title: data.title, url, status: data.status, records, total: records.length };
   });
   return { branches, latest: branches.flatMap(branch => branch.records).reduce((latest, record) => record.date > latest ? record.date : latest, ''), totalProjects: published.length };
 }
 
-/** Each branch is a project. Nodes run inside to outside in date order.
- * Spacing expresses sequence, not duration or project quality. */
+/** An open orbit is one project. Record order follows its path, not its length. */
 export function branchPoint(index: number, count: number, progress: number, expanded = 0): Vector {
-  const angle = -Math.PI / 2 + index / Math.max(count, 1) * Math.PI * 2 + .42 * progress;
-  const radius = 2.15 * Math.sin(progress * Math.PI / 2);
-  const x = radius * Math.cos(angle), y = 1.25 - 2.8 * progress, z = radius * Math.sin(angle);
-  const spread = count === 1 ? 0 : (index / (count - 1) - .5) * 4.7;
-  return [x + (spread * Math.sin(progress * Math.PI / 2) - x) * expanded,
-    y + (.24 * Math.abs(spread) * progress - .18 * progress) * expanded, z * (1 - expanded)];
+  const order = index / Math.max(1, count - 1);
+  const angle = -.55 * Math.PI + progress * Math.PI * 1.8 + index * .55;
+  const radius = 1.55 + order * .55;
+  const tilted = rotatePoint([radius * Math.cos(angle), radius * .82 * Math.sin(angle), 0], .35 + order * .9, -.7 + order * 1.8);
+  const twist = -.4 + order * 1.65;
+  const compact: Vector = [tilted[0] * Math.cos(twist) - tilted[1] * Math.sin(twist), tilted[0] * Math.sin(twist) + tilted[1] * Math.cos(twist), tilted[2]];
+  const spread: Vector = [2 * Math.cos(angle), (index - (count - 1) / 2) * .58 + .32 * Math.sin(angle), .32 * Math.sin(angle)];
+  return compact.map((value, i) => value + (spread[i] - value) * expanded) as Vector;
 }
-export function recordProgress(index: number, count: number) { return count === 1 ? .94 : .27 + index / (count - 1) * .67; }
+export function recordProgress(index: number, count: number) { return count === 1 ? .85 : .17 + index / (count - 1) * .68; }
+export function visibleGrowthRecords(branch: GrowthBranch) {
+  const offset = Math.max(0, branch.records.length - 6);
+  return branch.records.slice(offset).map((record, index, records) => ({ record, index: offset + index, progress: recordProgress(index, records.length) }));
+}
+export function growthPages(current: number, count: number): (number | 'gap')[] {
+  const pages = count <= 5 ? Array.from({ length: count }, (_, i) => i)
+    : [...new Set([0, current - 1, current, current + 1, count - 1])].filter(page => page >= 0 && page < count).sort((a, b) => a - b);
+  const result: (number | 'gap')[] = [];
+  pages.forEach((page, index) => { if (index && page - pages[index - 1] > 1) result.push('gap'); result.push(page); });
+  return result;
+}
 export function rotatePoint([x, y, z]: Vector, ax: number, ay: number): Vector {
   const px = x * Math.cos(ay) + z * Math.sin(ay), pz = -x * Math.sin(ay) + z * Math.cos(ay);
   return [px, y * Math.cos(ax) - pz * Math.sin(ax), y * Math.sin(ax) + pz * Math.cos(ax)];
 }
 export const GROWTH_PITCH_LIMIT = .6;
-export const GROWTH_PIVOT: Vector = [0, -.15, 0];
+export const GROWTH_PIVOT: Vector = [0, 0, 0];
 type Camera = { scale: number; x: number; y: number; pivot: Vector };
 const cameraBounds = new Map<number, { left: number; right: number; top: number; bottom: number }>();
 
@@ -71,7 +83,7 @@ export function growthCamera(count: number, width: number, height: number): Came
     }
     cameraBounds.set(count, bounds);
   }
-  const scale = Math.max(1, Math.min((width - 80) / (bounds.right - bounds.left + .24), (height - 96) / (bounds.bottom - bounds.top + .24)));
+  const scale = Math.max(1, Math.min((width - 48) / (bounds.right - bounds.left + .24), (height - 64) / (bounds.bottom - bounds.top + .24)));
   return { scale, x: width / 2, y: height / 2 + 6 - (bounds.top + bounds.bottom) / 2 * scale, pivot: GROWTH_PIVOT };
 }
 

@@ -41,6 +41,9 @@ export async function checkProjectGrowth({ page, browser, base, output, checks }
     assert.ok(layout.left >= 12 && layout.right <= layout.client - 12, `Canvas needs visible margins at ${width}`);
     assert.ok(layout.headingScroll <= layout.headingWidth + 1, `Headline overflows at ${width}`);
     assert.ok(layout.headingHeight <= layout.lineHeight * 2 + 1, `Headline punctuation wraps at ${width}`);
+    const reading = await page.locator('[data-growth-description]').evaluate(element => ({ font: parseFloat(getComputedStyle(element).fontSize), width: element.getBoundingClientRect().width }));
+    assert.ok(reading.font >= 16, `Record text must stay readable at ${width}`);
+    if (width >= 1280) assert.ok(reading.width >= 500, 'Records need a real reading column');
     if (width > 900) assert.ok(layout.copyRight + 20 <= layout.figureLeft, `Text and figure overlap at ${width}`);
     for (const button of await page.locator('.sculpture-controls button, .growth-projects button, .growth-record-nav button').all()) {
       const bounds = await button.boundingBox();
@@ -85,6 +88,13 @@ export async function checkProjectGrowth({ page, browser, base, output, checks }
   await page.locator(`[data-growth-project="${historyBranch}"]`).click();
   const latest = graph.branches[historyBranch].records.at(-1);
   assert.ok((await page.locator('[data-growth-title]').textContent()).includes(latest.title));
+  await page.locator('[data-growth-page="0"]').click();
+  assert.ok((await page.locator('[data-growth-title]').textContent()).includes(graph.branches[historyBranch].records[0].title), 'The oldest record must be reachable by its page');
+  assert.equal(await page.locator('[data-growth-previous]').isDisabled(), true);
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-growth-page')), '0', 'Page changes should retain keyboard focus');
+  await page.locator(`[data-growth-page="${graph.branches[historyBranch].records.length - 1}"]`).click();
+  assert.ok((await page.locator('[data-growth-title]').textContent()).includes(latest.title));
+  assert.equal(await page.locator('[data-growth-next]').isDisabled(), true);
   await page.locator('[data-growth-previous]').click();
   const previous = graph.branches[historyBranch].records.at(-2);
   assert.ok((await page.locator('[data-growth-title]').textContent()).includes(previous.title));

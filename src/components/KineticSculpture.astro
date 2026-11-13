@@ -1,5 +1,6 @@
 ---
-import { branchPoint, growthCamera, projectPoint, recordProgress, type GrowthGraph } from '../project-growth';
+import { branchPoint, growthCamera, projectPoint, visibleGrowthRecords, type GrowthGraph } from '../project-growth';
+import '../styles/growth.css';
 interface Props { enabled?: boolean; autoplay?: boolean; graph: GrowthGraph }
 const { enabled = true, autoplay = true, graph } = Astro.props;
 const initial = graph.branches.reduce((latest, branch, index) => {
@@ -9,49 +10,62 @@ const initial = graph.branches.reduce((latest, branch, index) => {
 }, undefined as { branch: number; record: number } | undefined);
 const activeBranch = initial && graph.branches[initial.branch];
 const activeRecord = activeBranch && activeBranch.records[initial!.record];
-const camera = growthCamera(graph.branches.length, 640, 420);
-const point = (branch: number, t: number) => projectPoint(branchPoint(branch, graph.branches.length, t), -.24, 0, 640, 420, camera);
-const path = (branch: number) => Array.from({ length: 33 }, (_, i) => {
-  const p = point(branch, i / 32); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+const camera = growthCamera(graph.branches.length, 640, 460);
+const point = (branch: number, t: number) => projectPoint(branchPoint(branch, graph.branches.length, t), -.24, 0, 640, 460, camera);
+const path = (branch: number) => Array.from({ length: 81 }, (_, i) => {
+  const p = point(branch, i / 80); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;
 }).join(' ');
 ---
-<figure class="kinetic-sculpture" data-sculpture={enabled && graph.branches.length ? '' : undefined} data-autoplay={autoplay} data-growth={JSON.stringify(graph)} aria-labelledby="sculpture-caption">
-  <div class="growth-heading"><span>PROJECT GROWTH / 项目生长图</span><span>{graph.branches.length} 条分支{graph.latest && <> · <time datetime={graph.latest}>{graph.latest}</time></>}</span></div>
-  <div class="sculpture-stage">
-    <svg class="sculpture-fallback" viewBox="0 0 640 420" aria-hidden="true">
-      {graph.branches.map((branch, index) => <g>
-        <path d={path(index)} fill="none" stroke="#6082ff" stroke-width="8" stroke-linecap="round" />
-        {branch.records.map((record, recordIndex) => {
-          const p = point(index, recordProgress(recordIndex, branch.records.length));
-          return <circle cx={p.x} cy={p.y} r="6" fill={record.date === graph.latest ? '#dafa88' : '#dce5ff'} />;
-        })}
-        <text x={point(index, 1).x + 12} y={point(index, 1).y} fill="#dce5ff" font-size="14">{String(index + 1).padStart(2, '0')}</text>
-      </g>)}
-    </svg>
-    {enabled && graph.branches.length > 0 && <canvas data-sculpture-canvas aria-label="项目生长图：每条分支代表一个项目，每个节点代表一条公开记录" aria-describedby="sculpture-instruction"></canvas>}
-    {!graph.branches.length && <p class="growth-empty">第一条项目记录，将从这里生长。</p>}
-  </div>
-  <figcaption id="sculpture-caption">
-    <span id="sculpture-instruction">分支是项目，节点是记录。<br /><span class="sculpture-instruction">由内向外按日期排列 · 浅绿标记最近更新</span><span class="sculpture-instruction" data-runtime-hint hidden>拖动或方向键旋转 · 轻点节点查看</span></span>
-    {enabled && graph.branches.length > 0 && <div class="sculpture-controls" hidden><button type="button" data-sculpture-shape aria-pressed="false">展开分支 ↗</button><button type="button" data-sculpture-pause aria-pressed="false">暂停转动 Ⅱ</button></div>}
-  </figcaption>
-  {activeBranch && activeRecord && <>
-    <div class="growth-projects" role="group" aria-label="选择项目分支" hidden>
-      {graph.branches.map((branch, index) => <button type="button" data-growth-project={index} aria-pressed={index === initial!.branch}><span>{String(index + 1).padStart(2, '0')}</span>{branch.title}</button>)}
+<div class="growth-workspace" data-sculpture={enabled && graph.branches.length ? '' : undefined} data-autoplay={autoplay} data-growth={JSON.stringify(graph)}>
+  <figure class="kinetic-sculpture" aria-labelledby="sculpture-caption">
+    <div class="growth-heading"><span>PROJECT ATLAS / 项目轨迹</span><span>{String(graph.branches.length).padStart(2, '0')} 个项目 · {graph.latest && <time datetime={graph.latest}>{graph.latest}</time>}</span></div>
+    <div class="sculpture-stage">
+      <svg class="sculpture-fallback" viewBox="0 0 640 460" aria-hidden="true">
+        {graph.branches.map((branch, index) => <g>
+          <path d={path(index)} fill="none" stroke={index === initial?.branch ? '#e8e0c9' : '#b8c3d2'} stroke-width="3" stroke-linecap="round" />
+          {visibleGrowthRecords(branch).map(({ record, progress }) => {
+            const p = point(index, progress);
+            return <circle cx={p.x} cy={p.y} r={record.date === graph.latest ? 4 : 2.5} fill={record.date === graph.latest ? '#e5d3a3' : '#dce5ef'} />;
+          })}
+          <text x={point(index, 1).x + 12} y={point(index, 1).y} fill="#dce5ef" font-size="16">{String(index + 1).padStart(2, '0')}</text>
+        </g>)}
+      </svg>
+      {enabled && graph.branches.length > 0 && <canvas data-sculpture-canvas aria-label="项目轨迹：每条金属轨道代表一个项目，光点对应最近的公开记录" aria-describedby="sculpture-instruction"></canvas>}
+      {!graph.branches.length && <p class="growth-empty">第一条项目记录，将从这里开始。</p>}
     </div>
-    <div class="growth-detail" aria-live="polite" aria-atomic="true">
-      <div class="growth-detail-meta"><a data-growth-project-link href={activeBranch.url}>{activeBranch.title}</a><span><time data-growth-date datetime={activeRecord.date}>{activeRecord.date}</time> · <span data-growth-kind>{activeRecord.kind}</span></span></div>
-      <h2><a data-growth-title href={activeRecord.url}>{activeRecord.title} ↗</a></h2>
-      <p data-growth-description>{activeRecord.description}</p>
-      <div class="growth-record-nav" hidden><span data-growth-counter></span><div><button type="button" data-growth-previous aria-label="查看上一条记录">←</button><button type="button" data-growth-next aria-label="查看下一条记录">→</button></div></div>
+    <figcaption id="sculpture-caption">
+      <span id="sculpture-instruction"><a href="#project-records" data-growth-preview>{activeBranch?.title ?? '项目轨迹'} <span aria-hidden="true">↘</span></a><span class="sculpture-instruction">轨道对应项目 · 光点对应最近记录</span><span class="sculpture-instruction" data-runtime-hint hidden>拖动旋转，轻点光点查看</span></span>
+      {enabled && graph.branches.length > 0 && <div class="sculpture-controls" hidden><button type="button" data-sculpture-shape aria-pressed="false">展开轨道 ↗</button><button type="button" data-sculpture-pause aria-pressed="false">暂停转动 Ⅱ</button></div>}
+    </figcaption>
+  </figure>
+  {activeBranch && activeRecord && <section class="growth-archive" id="project-records" aria-labelledby="growth-archive-title">
+    <div class="growth-archive-heading"><div><span class="index-label">PROJECT NOTES / 公开记录</span><h2 id="growth-archive-title">每一步，都有记录。</h2></div><p>选择一个项目，翻阅它的进展。<br />轨道仅显示最近 6 条，完整记录在这里按页阅读。</p></div>
+    <div class="growth-reader-grid">
+      <aside class="growth-project-picker" aria-label="项目列表">
+        <div class="growth-projects" role="group" aria-label="选择项目轨道" hidden>
+          {graph.branches.map((branch, index) => <button type="button" data-growth-project={index} aria-pressed={index === initial!.branch}><span>{String(index + 1).padStart(2, '0')}</span><span>{branch.title}<small>{branch.total} 条记录</small></span><span aria-hidden="true">→</span></button>)}
+        </div>
+        <div class="growth-projects-static">{graph.branches.map(branch => <a href={branch.url}>{branch.title} ↗</a>)}</div>
+      </aside>
+      <div class="growth-detail">
+        <div class="growth-record-content" aria-live="polite" aria-atomic="true">
+          <div class="growth-detail-meta"><a data-growth-project-link href={activeBranch.url}>{activeBranch.title}</a><span><time data-growth-date datetime={activeRecord.date}>{activeRecord.date}</time> · <span data-growth-kind>{activeRecord.kind}</span></span></div>
+          <h3><a data-growth-title href={activeRecord.url}><span data-growth-title-text>{activeRecord.title}</span><span aria-hidden="true">↗</span></a></h3>
+          <p data-growth-description>{activeRecord.description}</p>
+        </div>
+        <nav class="growth-record-nav" aria-label="记录分页" hidden>
+          <div class="growth-page-actions"><button type="button" data-growth-previous aria-label="查看上一条记录">← 上一条</button><span data-growth-counter></span><button type="button" data-growth-next aria-label="查看下一条记录">下一条 →</button></div>
+          <div class="growth-pages" data-growth-pages></div>
+        </nav>
+      </div>
     </div>
     <details class="growth-records-index">
-      <summary>浏览公开记录 <span aria-hidden="true">＋</span></summary>
-      <p>每个项目最多展示最近 6 条里程碑与文章，间距不代表时长或项目质量。完整内容见项目页。</p>
-      {graph.branches.map((branch, index) => <section><h3><a href={branch.url}>{String(index + 1).padStart(2, '0')} / {branch.title}</a><span>{branch.records.length} / {branch.total} 条</span></h3><ol>{branch.records.map(record => <li><a href={record.url} data-growth-record={record.id}><time datetime={record.date}>{record.date}</time><span>{record.title}</span><small>{record.kind} ↗</small></a></li>)}</ol></section>)}
+      <summary>查看全部记录目录 <span aria-hidden="true">＋</span></summary>
+      <p>日期表示已公开的里程碑或文章修订。轨道长度、节点间距和记录数量不代表项目质量。</p>
+      <div class="growth-index-grid">{graph.branches.map((branch, index) => <section><h3><a href={branch.url}>{String(index + 1).padStart(2, '0')} / {branch.title}</a><span>{branch.total} 条记录</span></h3><ol>{branch.records.map(record => <li><a href={record.url} data-growth-record={record.id}><time datetime={record.date}>{record.date}</time><span>{record.title}</span><small>{record.kind} ↗</small></a></li>)}</ol></section>)}</div>
     </details>
-  </>}
-</figure>
+  </section>}
+</div>
 <script>
   import { mountSculpture } from '../scripts/sculpture';
   const disposers = [...document.querySelectorAll<HTMLElement>('[data-sculpture]')].map(mountSculpture);

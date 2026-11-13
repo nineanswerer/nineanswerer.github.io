@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildProjectGrowth, branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, GROWTH_PIVOT, growthCamera, projectPoint, recordProgress } from '../src/project-growth.ts';
+import { buildProjectGrowth, branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, GROWTH_PIVOT, growthCamera, growthPages, projectPoint, recordProgress, visibleGrowthRecords } from '../src/project-growth.ts';
 
 const date = value => new Date(`${value}T00:00:00Z`);
 const project = (id, extra = {}) => ({ id, data: { title: id, description: '已有项目说明', status: '开发中', date: date('2026-10-01'), order: 1, updates: [], ...extra } });
@@ -37,13 +37,27 @@ test('same-day writing and milestones remain separate and input ordering is imma
   assert.deepEqual(graph, buildProjectGrowth([...projects].reverse(), [...writing].reverse()));
 });
 
-test('bounded recent records keep true totals and project budgets retain the full public count', () => {
+test('all history remains pageable while the sculpture has at most six recent nodes per project', () => {
   const writing = Array.from({ length: 9 }, (_, i) => article(`record-${i}`, { date: date(`2026-10-${String(i + 1).padStart(2, '0')}`) }));
   const graph = buildProjectGrowth([project('public'), project('z')], writing, 1);
   assert.equal(graph.totalProjects, 2);
   assert.equal(graph.branches.length, 1);
   assert.equal(graph.branches[0].total, 9);
-  assert.deepEqual(graph.branches[0].records.map(record => record.title), ['record-3', 'record-4', 'record-5', 'record-6', 'record-7', 'record-8']);
+  assert.equal(graph.branches[0].records.length, 9);
+  const visible = visibleGrowthRecords(graph.branches[0]);
+  assert.deepEqual(visible.map(({ record }) => record.title), ['record-3', 'record-4', 'record-5', 'record-6', 'record-7', 'record-8']);
+  assert.deepEqual(visible.map(({ index }) => index), [3, 4, 5, 6, 7, 8]);
+});
+
+test('pagination always offers the selected page and endpoints without crowding small screens', () => {
+  assert.deepEqual(growthPages(0, 1), [0]);
+  assert.deepEqual(growthPages(3, 8), [0, 'gap', 2, 3, 4, 'gap', 7]);
+  assert.deepEqual(growthPages(7, 8), [0, 'gap', 6, 7]);
+  for (let selected = 0; selected < 40; selected++) {
+    const pages = growthPages(selected, 40);
+    assert.ok(pages.includes(0) && pages.includes(39) && pages.includes(selected));
+    assert.ok(pages.filter(page => page !== 'gap').length <= 5);
+  }
 });
 
 test('nodes stay inside the drawing surface through rotation, expansion and mobile sizing', () => {

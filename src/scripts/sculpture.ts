@@ -1,6 +1,7 @@
-import { branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, growthCamera, projectPoint, recordProgress, rotatePoint, type GrowthGraph, type Vector } from '../project-growth';
+import { branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, growthCamera, growthPages, projectPoint, rotatePoint, visibleGrowthRecords, type GrowthGraph, type Vector } from '../project-growth';
 
-type SurfacePoint = { compact: Vector; spread: Vector; normal: Vector; spreadNormal: Vector };
+type SurfacePoint = { compact: Vector; spread: Vector; normal: Vector; spreadNormal: Vector;
+  screen?: ReturnType<typeof projectPoint>; lightNormal?: Vector };
 type Face = { vertices: SurfacePoint[]; branch: number };
 type Hit = { x: number; y: number; z: number; branch: number; record: number };
 const TAU = Math.PI * 2;
@@ -43,11 +44,14 @@ export function mountSculpture(root: HTMLElement) {
   const previous = root.querySelector<HTMLButtonElement>('[data-growth-previous]')!;
   const next = root.querySelector<HTMLButtonElement>('[data-growth-next]')!;
   const title = root.querySelector<HTMLAnchorElement>('[data-growth-title]')!;
+  const titleText = root.querySelector<HTMLElement>('[data-growth-title-text]')!;
   const projectLink = root.querySelector<HTMLAnchorElement>('[data-growth-project-link]')!;
   const date = root.querySelector<HTMLTimeElement>('[data-growth-date]')!;
   const kind = root.querySelector<HTMLElement>('[data-growth-kind]')!;
   const description = root.querySelector<HTMLElement>('[data-growth-description]')!;
   const counter = root.querySelector<HTMLElement>('[data-growth-counter]')!;
+  const pageLinks = root.querySelector<HTMLElement>('[data-growth-pages]')!;
+  const preview = root.querySelector<HTMLAnchorElement>('[data-growth-preview]')!;
   let activeBranch = Math.max(0, graph.branches.findIndex(branch => branch.records.at(-1)?.date === graph.latest));
   let activeRecord = graph.branches[activeBranch].records.length - 1;
   let hits: Hit[] = [];
@@ -59,16 +63,22 @@ export function mountSculpture(root: HTMLElement) {
     const normal = normalise(cross(tangent, [0, 0, 1]));
     const binormal = normalise(cross(tangent, normal));
     const v = side * TAU;
-    const n = normal.map((value, i) => value * Math.cos(v) + binormal[i] * Math.sin(v)) as Vector;
-    return { point: centre.map((value, i) => value + n[i] * (.16 - .095 * t)) as Vector, normal: n };
+    const taper = Math.pow(Math.max(0, Math.sin(t * Math.PI)), .28);
+    const halfWidth = .052 * taper, thickness = .008 * taper;
+    const offset = normal.map((value, i) => value * Math.cos(v) * halfWidth + binormal[i] * Math.sin(v) * thickness) as Vector;
+    const n = normalise(normal.map((value, i) => value * Math.cos(v) * .008 + binormal[i] * Math.sin(v) * .052) as Vector);
+    return { point: centre.map((value, i) => value + offset[i]) as Vector, normal: n };
   }
   const faces: Face[] = [];
-  const segments = finePointer.matches ? 36 : 24, sides = 8;
+  const vertices: SurfacePoint[] = [];
+  const segments = finePointer.matches ? 112 : 72, sides = 8;
   graph.branches.forEach((_, branch) => {
     const rows = Array.from({ length: segments + 1 }, (__, i) => Array.from({ length: sides }, (___, j) => {
       const compact = surface(branch, i / segments, j / sides, 0);
       const spread = surface(branch, i / segments, j / sides, 1);
-      return { compact: compact.point, spread: spread.point, normal: compact.normal, spreadNormal: spread.normal };
+      const vertex = { compact: compact.point, spread: spread.point, normal: compact.normal, spreadNormal: spread.normal };
+      vertices.push(vertex);
+      return vertex;
     }));
     for (let i = 0; i < segments; i++) for (let j = 0; j < sides; j++) {
       faces.push({ vertices: [rows[i][j], rows[i + 1][j], rows[i + 1][(j + 1) % sides], rows[i][(j + 1) % sides]], branch });
@@ -86,63 +96,68 @@ export function mountSculpture(root: HTMLElement) {
     const selected = graph.branches[branch], item = selected.records[record];
     projectButtons.forEach((button, index) => button.setAttribute('aria-pressed', String(index === branch)));
     projectLink.textContent = selected.title; projectLink.href = selected.url;
-    title.textContent = `${item.title} ↗`; title.href = item.url;
+    preview.textContent = `${selected.title} ↘`;
+    titleText.textContent = item.title; title.href = item.url;
     date.textContent = item.date; date.dateTime = item.date; kind.textContent = item.kind;
     description.textContent = item.description;
-    counter.textContent = `记录 ${record + 1} / ${selected.records.length}${selected.total > 6 ? ' · 最近 6 条' : ''}`;
+    counter.textContent = `第${record + 1}/${selected.records.length}页`;
     previous.disabled = record === 0; next.disabled = record === selected.records.length - 1;
+    const restoreFocus = pageLinks.contains(document.activeElement);
+    pageLinks.replaceChildren(...growthPages(record, selected.records.length).map(page => {
+      if (page === 'gap') { const gap = document.createElement('span'); gap.textContent = '…'; gap.setAttribute('aria-hidden', 'true'); return gap; }
+      const button = document.createElement('button'); button.type = 'button'; button.textContent = String(page + 1);
+      button.dataset.growthPage = String(page); button.setAttribute('aria-label', `第 ${page + 1} 页：${selected.records[page].title}`);
+      if (page === record) button.setAttribute('aria-current', 'page');
+      return button;
+    }));
+    if (restoreFocus) pageLinks.querySelector<HTMLButtonElement>('[aria-current="page"]')?.focus({ preventScroll: true });
     if (reading) { paused = true; stop(); updatePause(); }
     render(); start();
   }
   function render() {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    const origin = project([0, 1.25, 0]);
-    const glow = ctx.createRadialGradient(origin.x, origin.y, 0, origin.x, origin.y, width * .36);
-    glow.addColorStop(0, '#4267ff18'); glow.addColorStop(1, '#4267ff00');
+    const origin = project([0, 0, 0]);
+    const glow = ctx.createRadialGradient(origin.x, origin.y, 0, origin.x, origin.y, width * .42);
+    glow.addColorStop(0, '#c6d0dd09'); glow.addColorStop(1, '#c6d0dd00');
     ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height);
-    // A common origin denotes authorship; no invented links between projects.
-    ctx.beginPath();
-    for (let i = 0; i <= 64; i++) {
-      const a = i / 64 * TAU, p = project([.48 * Math.cos(a), 1.3, .48 * Math.sin(a)]);
-      if (!i) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
-    }
-    ctx.strokeStyle = '#7b91c65c'; ctx.lineWidth = 1; ctx.stroke();
+    vertices.forEach(vertex => {
+      vertex.screen = project(mix(vertex.compact, vertex.spread, expanded));
+      vertex.lightNormal = rotatePoint(mix(vertex.normal, vertex.spreadNormal, expanded), rotationX, rotationY);
+    });
     const projected = faces.map(face => {
-      const points = face.vertices.map(vertex => project(mix(vertex.compact, vertex.spread, expanded)));
-      const normal = rotatePoint(mix(face.vertices[0].normal, face.vertices[0].spreadNormal, expanded), rotationX, rotationY);
+      const points = face.vertices.map(vertex => vertex.screen!);
+      const normal = normalise(face.vertices.reduce<Vector>((sum, vertex) => sum.map((value, i) => value + vertex.lightNormal![i]) as Vector, [0, 0, 0]));
       return { ...face, points, normal, z: points.reduce((sum, p) => sum + p.z, 0) / points.length };
     }).sort((a, b) => a.z - b.z);
     ctx.lineJoin = 'round';
     for (const face of projected) {
       const [nx, ny, nz] = face.normal;
-      const light = Math.max(0, nx * -.32 + ny * -.55 + nz * .75);
-      const specular = Math.pow(Math.max(0, nz * .88 - ny * .35), 20);
+      const light = Math.max(0, nx * -.22 + ny * -.45 + nz * .86);
+      const specular = Math.pow(Math.max(0, nz * .86 - ny * .24 - nx * .12), 32);
       const selected = face.branch === activeBranch;
-      const r = 23 + light * (selected ? 45 : 40) + specular * 110;
-      const g = 42 + light * (selected ? 78 : 57) + specular * 115;
-      const b = (selected ? 159 : 103) + light * 80 + specular * 55;
+      const r = (selected ? 69 : 41) + light * (selected ? 141 : 137) + specular * 104;
+      const g = (selected ? 62 : 48) + light * (selected ? 129 : 145) + specular * 106;
+      const b = (selected ? 47 : 59) + light * (selected ? 100 : 154) + specular * 108;
       ctx.beginPath(); face.points.forEach((p, i) => { if (!i) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); }); ctx.closePath();
-      ctx.fillStyle = `rgb(${r|0},${g|0},${Math.min(255, b)|0})`; ctx.fill();
-      ctx.strokeStyle = `rgba(123,157,255,${.12 + light * .22})`; ctx.lineWidth = .45; ctx.stroke();
+      ctx.fillStyle = `rgb(${Math.min(255, r)|0},${Math.min(255, g)|0},${Math.min(255, b)|0})`; ctx.fill();
+      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .3; ctx.stroke();
     }
-    hits = graph.branches.flatMap((branch, branchIndex) => branch.records.map((_, record) => ({
-      ...project(branchPoint(branchIndex, graph.branches.length, recordProgress(record, branch.records.length), expanded)), branch: branchIndex, record,
+    hits = graph.branches.flatMap((branch, branchIndex) => visibleGrowthRecords(branch).map(({ index, progress }) => ({
+      ...project(branchPoint(branchIndex, graph.branches.length, progress, expanded)), branch: branchIndex, record: index,
     })));
     const pulse = !paused && !reduced.matches && performance.now() < introEnd ? .5 + .5 * Math.sin(performance.now() / 180) : 0;
     [...hits].sort((a, b) => a.z - b.z).forEach(hit => {
       const item = graph.branches[hit.branch].records[hit.record];
       const selected = hit.branch === activeBranch && hit.record === activeRecord;
       const latest = item.date === graph.latest;
-      const radius = item.kind === '里程碑' ? 8 : 6.5;
+      const radius = item.kind === '里程碑' ? 3.8 : 2.5;
       if (selected || hits.indexOf(hit) === hovered || (latest && pulse)) {
-        ctx.beginPath(); ctx.arc(hit.x, hit.y, radius + 5 + (latest ? pulse * 3 : 0), 0, TAU);
-        ctx.strokeStyle = selected ? '#e5eeffcc' : '#dafa8866'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.beginPath(); ctx.arc(hit.x, hit.y, radius + 5 + (latest ? pulse * 2 : 0), 0, TAU);
+        ctx.strokeStyle = selected ? '#e8d6a4aa' : '#e8d6a455'; ctx.lineWidth = .8; ctx.stroke();
       }
-      const gradient = ctx.createRadialGradient(hit.x - 2, hit.y - 2, 0, hit.x, hit.y, radius);
-      gradient.addColorStop(0, latest ? '#f1ffd3' : '#f3f6ff');
-      gradient.addColorStop(1, latest ? '#aaca63' : '#7895db');
-      ctx.beginPath(); ctx.arc(hit.x, hit.y, radius, 0, TAU); ctx.fillStyle = gradient; ctx.fill();
+      ctx.shadowColor = latest ? '#e3cfa2' : '#dce5ef'; ctx.shadowBlur = latest ? 12 : 0;
+      ctx.beginPath(); ctx.arc(hit.x, hit.y, radius, 0, TAU); ctx.fillStyle = latest ? '#f1dfb5' : '#d4dce5'; ctx.fill(); ctx.shadowBlur = 0;
     });
     // Numbered tips correspond to the stationary project buttons beneath the canvas.
     const labels: { x: number; y: number }[] = [];
@@ -153,13 +168,9 @@ export function mountSculpture(root: HTMLElement) {
       const label = candidates.find(p => labels.every(other => Math.hypot(other.x - p.x, other.y - p.y) > 29)) ?? candidates[0];
       labels.push(label);
       ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(label.x, label.y); ctx.strokeStyle = '#7389b55c'; ctx.lineWidth = .7; ctx.stroke();
-      ctx.font = '11px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.beginPath(); ctx.arc(label.x, label.y, 12, 0, TAU);
-      ctx.fillStyle = '#101214'; ctx.fill(); ctx.strokeStyle = index === activeBranch ? '#9cb1ff' : '#63759d'; ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = index === activeBranch ? '#e3eaff' : '#a0afcd'; ctx.fillText(String(index + 1).padStart(2, '0'), label.x, label.y);
+      ctx.font = '13px ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = index === activeBranch ? '#e8d6aa' : '#b4bdc9'; ctx.fillText(String(index + 1).padStart(2, '0'), label.x, label.y);
     });
-    ctx.font = '9px ui-monospace, monospace'; ctx.fillStyle = '#8d9ab5'; ctx.textAlign = 'center';
-    ctx.fillText('九术 / WORKSHOP', origin.x, Math.min(height - 14, origin.y + 27));
     root.classList.add('is-rendered');
     dirty = false;
   }
@@ -195,7 +206,7 @@ export function mountSculpture(root: HTMLElement) {
   shapeButton.addEventListener('click', () => {
     expandTarget = expandTarget ? 0 : 1;
     shapeButton.setAttribute('aria-pressed', String(!!expandTarget));
-    shapeButton.textContent = expandTarget ? '收拢分支 ↙' : '展开分支 ↗';
+    shapeButton.textContent = expandTarget ? '收拢轨道 ↙' : '展开轨道 ↗';
     root.dataset.shape = expandTarget ? 'spread' : 'growth';
     if (expandTarget) { rotationX = -.24; rotationY = 0; }
     if (reduced.matches) { expanded = expandTarget; render(); }
@@ -209,6 +220,10 @@ export function mountSculpture(root: HTMLElement) {
   projectButtons.forEach((button, branch) => button.addEventListener('click', () => choose(branch, graph.branches[branch].records.length - 1), { signal }));
   previous.addEventListener('click', () => { if (activeRecord > 0) choose(activeBranch, activeRecord - 1); }, { signal });
   next.addEventListener('click', () => { if (activeRecord < graph.branches[activeBranch].records.length - 1) choose(activeBranch, activeRecord + 1); }, { signal });
+  pageLinks.addEventListener('click', event => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-growth-page]');
+    if (button) choose(activeBranch, Number(button.dataset.growthPage));
+  }, { signal });
   root.querySelectorAll<HTMLAnchorElement>('[data-growth-record]').forEach(link => {
     link.addEventListener('focus', () => {
       graph.branches.forEach((branch, i) => {

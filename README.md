@@ -91,7 +91,7 @@ presentation:
 src/content.config.ts           内容 schema，构建时校验
 src/content.ts                  统一公开项目与写作查询
 src/home-model.ts               重点选择、排序、数量限制
-src/project-growth.ts           公开记录选择与稳定的项目分支几何
+src/project-growth.ts           公开记录、分页选择与稳定的轨道几何
 src/pages/index.astro           首页内容编排
 src/components/home/            可复用的重点项目与项目卡片
 src/components/KineticSculpture.astro  可开关的视觉组件
@@ -101,6 +101,7 @@ src/styles/global.css           设计变量、基础元素
 src/styles/shared.css           全站导航、字体、页脚
 src/styles/pages.css            列表、项目与文章详情
 src/styles/home.css             仅首页加载的构成与动效
+src/styles/growth.css           轨道展示与可读的分页档案
 scripts/verify-build.mjs         静态链接、资源和首页体积检查
 ```
 
@@ -109,7 +110,7 @@ scripts/verify-build.mjs         静态链接、资源和首页体积检查
 ## 动效与性能约束
 
 - 首页 `visual.enabled: false` 显示静态构成；`autoplay: false` 关闭默认旋转。
-- 生长图复用公开项目的 `updates` 和关联长文；按项目排序，每支最多保留最近 6 条。文章修订明确标记，不从项目日期推断立项或发布。节点顺序代表日期先后，间距不代表时长。普通项目记录不补造里程碑。
+- 轨道复用公开项目的 `updates` 和关联长文；每轨最多绘制最近 6 个节点，完整历史保留在 `records` 中供分页和静态目录阅读。正文至少 16px，页码最多同时显示 5 个可点击数字。文章修订明确标记，不从项目日期推断立项或发布。路径只表达记录顺序，长度不代表时长或质量。
 - 无 JavaScript 或 Canvas 不可用时，静态 SVG、记录目录和普通链接仍可用，交互按钮保持隐藏。
 - 尊重系统减少动态效果设置，页面打开期间更改偏好也会生效。暂停状态在当前浏览器会话内记忆。
 - 雕塑离屏或标签页隐藏时停止循环；组件释放时移除监听器和观察器。移动端使用较少网格与较低帧率上限。

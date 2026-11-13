@@ -224,7 +224,7 @@
 .experimental-page {
   --home-gutter: clamp(16px,3.6vw,88px);
   --chapter-space: clamp(65px,7.5vw,170px);
-  --sculpture-height: clamp(340px,30vw,560px);
+  --sculpture-height: clamp(400px,32vw,620px);
   --stage-bg: #101214;
   --stage-ink: #f3f2e9;
   --stage-muted: #a4a8b0;
@@ -251,7 +251,7 @@ html:has(.experimental-page) { scroll-padding-top: 108px; }
 .experimental-page .manifesto-top > span:last-child { display: flex; align-items: center; gap: 9px; }
 .live-mark { width: 5px; height: 5px; border-radius: 50%; background: var(--acid); }
 .experimental-page .manifesto-grid { position: relative; display: grid; grid-template-columns: minmax(0,1.04fr) minmax(0,1fr); align-items: center; gap: clamp(24px,3.5vw,90px); padding: 46px 0 40px; }
-.experimental-page .manifesto-copy { position: relative; z-index: 2; min-width: 0; }
+.experimental-page .manifesto-copy { position: relative; z-index: 2; min-width: 0; grid-column: 1; grid-row: 1; }
 .experimental-page .manifesto-copy h1 { font-size: clamp(48px,8.1vw,210px); letter-spacing: -.075em; }
 .experimental-page .manifesto-copy h1 > span { white-space: nowrap; }
 .hero-edition { display: inline-block; margin-bottom: 32px; color: var(--stage-muted); font-family: var(--mono); font-size: 10px; letter-spacing: .12em; }
@@ -269,54 +269,6 @@ html:has(.experimental-page) { scroll-padding-top: 108px; }
 .experimental-page .hero-status a { color: var(--stage-ink); }
 .experimental-page .hero-status > .status-dot { background: var(--acid); }
 .experimental-page .scroll-note { color: var(--stage-muted); }
-
-/* Public project records form a contained, navigable 3D sculpture. */
-.kinetic-sculpture { position: relative; z-index: 1; width: 100%; min-width: 0; max-width: 840px; margin: 0 auto; }
-.growth-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; color: #a5b2cd; font: 9px/1.6 var(--mono); letter-spacing: .035em; }
-.growth-heading > span:last-child { color: #8a94a7; }
-.sculpture-stage { position: relative; width: 100%; height: var(--sculpture-height); }
-.sculpture-stage canvas { position: relative; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
-.sculpture-stage canvas:focus-visible { outline-color: var(--acid); outline-offset: -4px; }
-.sculpture-stage canvas.is-dragging { cursor: grabbing; }
-.kinetic-sculpture figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 16px; border-bottom: 1px solid #ffffff24; color: #c1c4cb; font-size: 11px; line-height: 1.8; }
-.sculpture-instruction { display: block; color: #939eb2; font-size: 10px; }
-.sculpture-controls { display: none; gap: 8px; flex-wrap: wrap; }
-.is-rendered .sculpture-controls { display: flex; }
-.sculpture-controls button { min-height: 44px; padding: 8px 11px; border: 1px solid #ffffff30; background: #101214d9; color: #e5e9f3; font-family: var(--sans); font-size: 11px; cursor: pointer; }
-.sculpture-controls button:hover, .sculpture-controls button[aria-pressed="true"] { color: var(--acid); border-color: #dafa8880; }
-.sculpture-controls button:focus-visible { outline-color: var(--acid); }
-.sculpture-fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
-.is-rendered .sculpture-fallback { display: none; }
-.growth-projects { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; padding-block: 14px; }
-.growth-projects[hidden], .growth-record-nav[hidden], [data-runtime-hint][hidden] { display: none; }
-.growth-projects button { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid #ffffff20; color: #b3bdd1; background: transparent; font: 11px/1.4 var(--sans); text-align: left; overflow-wrap: anywhere; cursor: pointer; }
-.growth-projects button > span { flex: none; color: #8c9abd; font: 10px var(--mono); }
-.growth-projects button[aria-pressed="true"] { border-color: #7895e7; background: #5e7cff18; color: #f0f4ff; }
-.growth-projects button[aria-pressed="true"] > span { color: var(--acid); }
-.growth-projects button:focus-visible, .growth-record-nav button:focus-visible, .growth-records-index :focus-visible, .growth-detail a:focus-visible { outline-color: var(--acid); }
-.growth-detail { padding: 16px; border: 1px solid #ffffff26; background: #171c26a6; }
-.growth-detail-meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 5px 10px; font-size: 10px; color: #9eacc6; }
-.growth-detail-meta > a { color: #c5d3f7; overflow-wrap: anywhere; }
-.growth-detail h2 { margin: 10px 0 8px; font: 400 17px/1.5 var(--sans); letter-spacing: -.015em; color: #eef2fc; }
-.growth-detail h2 a:hover { color: var(--acid); }
-.growth-detail > p { margin: 0; min-height: 3.4em; color: #aab6ce; font-size: 12px; line-height: 1.75; }
-.growth-record-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; color: #9eacc6; font: 10px var(--mono); }
-.growth-record-nav > div { display: flex; gap: 6px; }
-.growth-record-nav button { width: 44px; height: 44px; border: 1px solid #ffffff30; color: #e5edff; background: transparent; cursor: pointer; font-size: 17px; }
-.growth-record-nav button:disabled { opacity: .3; cursor: default; }
-.growth-records-index { padding-top: 12px; color: #acb8ce; font-size: 11px; }
-.growth-records-index summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; cursor: pointer; }
-.growth-records-index[open] summary { color: var(--acid); }
-.growth-records-index > p { color: #94a1b9; line-height: 1.8; }
-.growth-records-index section { padding-top: 12px; border-top: 1px solid #ffffff20; }
-.growth-records-index h3 { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 400; color: #d4def4; }
-.growth-records-index h3 > span { color: #92a0b9; font: 10px var(--mono); }
-.growth-records-index ol { margin: 0; padding: 0; list-style: none; }
-.growth-records-index li > a { display: grid; grid-template-columns: 76px minmax(0,1fr); align-items: baseline; gap: 3px 10px; min-height: 44px; padding: 9px 0; border-top: 1px solid #ffffff12; color: #c6d2e9; }
-.growth-records-index li time { grid-row: span 2; color: #899ab9; font: 9px var(--mono); }
-.growth-records-index li small { color: #899ab9; font-size: 10px; }
-.growth-empty { padding: 90px 20px; color: #aab6ce; font-size: 14px; text-align: center; }
-@media (min-width:1280px) { .growth-projects { grid-template-columns: repeat(4,minmax(0,1fr)); } }
 
 /* A typographic ribbon driven by native vertical scrolling. */
 .kinetic-band { overflow: hidden; padding-block: 17px 23px; background: var(--acid); color: #14191b; }
@@ -337,7 +289,6 @@ html:has(.experimental-page) { scroll-padding-top: 108px; }
   .experimental-page .manifesto-grid { grid-template-columns: minmax(0,1fr); gap: 34px; }
   .experimental-page .manifesto-copy h1 { font-size: clamp(58px,11vw,95px); }
   .experimental-page .manifesto-intro p { max-width: 48ch; }
-  .kinetic-sculpture { max-width: 620px; }
   .experimental-page { --sculpture-height: clamp(300px,52vw,390px); }
 }
 @media (max-width:720px) {
@@ -352,12 +303,6 @@ html:has(.experimental-page) { scroll-padding-top: 108px; }
   .experimental-page .title-accent { -webkit-text-stroke-width: .75px; }
   .experimental-page .manifesto-intro { margin-top: 25px; }
   .experimental-page .manifesto-intro p { max-width: 490px; font-size: 13px; }
-  .kinetic-sculpture { width: 100%; margin: 0 auto; }
-  .sculpture-stage { width: 100%; }
-  .sculpture-stage canvas { transform: none; }
-  .kinetic-sculpture figcaption { gap: 12px; padding-bottom: 14px; }
-  .sculpture-controls { flex-wrap: nowrap; gap: 6px; }
-  .sculpture-controls button { min-height: 44px; padding: 8px; gap: 8px; font-size: 10px; }
   .experimental-page .manifesto-bottom { gap: 17px; padding-block: 18px 22px; }
   .experimental-page .hero-status { font-size: 10px; }
   .kinetic-band { padding-block: 15px 19px; }
@@ -366,10 +311,6 @@ html:has(.experimental-page) { scroll-padding-top: 108px; }
 }
 @media (max-width:380px) {
   .hero-edition { font-size: 8px; }
-  .sculpture-controls button { gap: 5px; padding-inline: 7px; font-size: 9px; }
-  .sculpture-controls { gap: 4px; }
-  .kinetic-sculpture figcaption { gap: 7px; }
-  .sculpture-instruction { font-size: 9px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .experimental-page .manifesto-copy, .sculpture-stage canvas, .kinetic-band-track { transform: none; }
