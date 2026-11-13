@@ -54,8 +54,27 @@ export async function checkProjectGrowth({ page, browser, base, output, checks }
   await canvas.press('ArrowRight'); assert.notEqual(await picture(), original, 'Keyboard rotation should affect the actual drawing');
   await canvas.press('Home');
   const bounds = await canvas.boundingBox();
+  const grabX = bounds.x + bounds.width / 2, grabY = bounds.y + bounds.height * .84;
+  await page.mouse.move(grabX, grabY);
+  const beforeGrab = await picture();
+  await page.mouse.down();
+  await page.mouse.move(grabX + 3, grabY);
+  assert.equal(await picture(), beforeGrab, 'A tiny click movement should not rotate');
+  await page.mouse.move(grabX + 70, grabY + 10, { steps: 8 });
+  assert.notEqual(await picture(), beforeGrab, 'A real mouse drag should rotate');
+  assert.equal(await canvas.evaluate(element => getComputedStyle(element).cursor), 'grabbing');
+  await page.mouse.up(); await page.mouse.move(0, 0);
+  assert.equal(await sculpture.getAttribute('data-paused'), 'true', 'Manual rotation should visibly pause autoplay');
+  const released = await picture(); await wait(200);
+  assert.equal(await picture(), released, 'Releasing a manual drag should hold the chosen angle');
+  // Pointer capture must finish a quick drag even when the pointer leaves the canvas.
+  await page.mouse.move(grabX, grabY); await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width + 30, grabY, { steps: 6 });
+  await page.mouse.up();
+  assert.equal(await canvas.evaluate(element => element.classList.contains('is-dragging')), false);
+  await canvas.press('Home'); await page.mouse.move(0, 0);
   const graph = JSON.parse(await sculpture.getAttribute('data-growth'));
-  const camera = growthCamera(graph.branches.length, 0, -.24, 0, bounds.width, bounds.height);
+  const camera = growthCamera(graph.branches.length, bounds.width, bounds.height);
   const targetBranch = graph.branches.findIndex(branch => branch.records.length === 1);
   const target = projectPoint(branchPoint(targetBranch, graph.branches.length, recordProgress(0, 1)), -.24, 0, bounds.width, bounds.height, camera);
   await page.mouse.click(bounds.x + target.x, bounds.y + target.y);
@@ -134,5 +153,5 @@ export async function checkProjectGrowth({ page, browser, base, output, checks }
     await reader.locator('[data-growth-record]').first().click();
     assert.notEqual(new URL(reader.url()).pathname, '/'); await fallback.close();
   }
-  checks.push('project growth: six widths, real-node picking, keyboard/touch, pause/resume/persistence, history navigation, reduced motion, offscreen and static fallbacks');
+  checks.push('project growth: six widths, real-node picking, mouse drag/capture/release, keyboard/touch, pause/resume/persistence, history navigation, reduced motion, offscreen and static fallbacks');
 }

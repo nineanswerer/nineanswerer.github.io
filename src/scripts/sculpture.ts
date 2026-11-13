@@ -1,4 +1,4 @@
-import { branchPoint, growthCamera, projectPoint, recordProgress, rotatePoint, type GrowthGraph, type Vector } from '../project-growth';
+import { branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, growthCamera, projectPoint, recordProgress, rotatePoint, type GrowthGraph, type Vector } from '../project-growth';
 
 type SurfacePoint = { compact: Vector; spread: Vector; normal: Vector; spreadNormal: Vector };
 type Face = { vertices: SurfacePoint[]; branch: number };
@@ -32,10 +32,11 @@ export function mountSculpture(root: HTMLElement) {
   try { const saved = sessionStorage.getItem('sculpture-paused'); if (saved !== null) userPaused = saved === 'true'; } catch { /* Storage is optional. */ }
   let paused = reduced.matches || !!connection?.saveData || (userPaused ?? !autoplay);
   let width = 1, height = 1, ratio = 1, rotationX = -.24, rotationY = 0;
-  let camera = growthCamera(graph.branches.length, 0, rotationX, rotationY, width, height);
+  let camera = growthCamera(graph.branches.length, width, height);
   let expanded = 0, expandTarget = 0, visible = false, frame = 0, lastDraw = 0;
   let hovered = -1, engaged = false, focused = false;
-  let pointer: { id: number; x: number; y: number; lastX: number; lastY: number; touch: boolean; moved: boolean } | undefined;
+  let pointer: { id: number; x: number; y: number; lastX: number; lastY: number; span: number; touch: boolean; moved: boolean } | undefined;
+  let dirty = false;
   const introEnd = performance.now() + 1800;
   const frameInterval = finePointer.matches ? 1000 / 30 : 1000 / 24;
   const projectButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-growth-project]')];
@@ -94,7 +95,6 @@ export function mountSculpture(root: HTMLElement) {
     render(); start();
   }
   function render() {
-    camera = growthCamera(graph.branches.length, expanded, rotationX, rotationY, width, height);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
     const origin = project([0, 1.25, 0]);
@@ -161,13 +161,14 @@ export function mountSculpture(root: HTMLElement) {
     ctx.font = '9px ui-monospace, monospace'; ctx.fillStyle = '#8d9ab5'; ctx.textAlign = 'center';
     ctx.fillText('九术 / WORKSHOP', origin.x, Math.min(height - 14, origin.y + 27));
     root.classList.add('is-rendered');
+    dirty = false;
   }
   function stop() { cancelAnimationFrame(frame); frame = 0; lastDraw = 0; }
-  function moving() { return (!paused && !engaged && !focused && !pointer) || Math.abs(expandTarget - expanded) > .0005; }
+  function moving() { return dirty || (!paused && !engaged && !focused && !pointer) || Math.abs(expandTarget - expanded) > .0005; }
   function tick(time: number) {
     frame = 0;
     if (!visible || document.hidden) return;
-    if (time - lastDraw >= frameInterval) {
+    if (dirty || time - lastDraw >= frameInterval) {
       const elapsed = lastDraw ? Math.min((time - lastDraw) / 1000, .08) : .033;
       if (!paused && !engaged && !focused && !pointer) rotationY += elapsed * .11;
       expanded += (expandTarget - expanded) * (reduced.matches ? 1 : 1 - Math.exp(-elapsed * 14));
@@ -180,6 +181,7 @@ export function mountSculpture(root: HTMLElement) {
   function resize() {
     const bounds = stage!.getBoundingClientRect();
     width = Math.max(1, bounds.width); height = Math.max(1, bounds.height);
+    camera = growthCamera(graph.branches.length, width, height);
     ratio = Math.min(devicePixelRatio || 1, finePointer.matches ? 1.5 : 1.25, Math.sqrt(1_500_000 / (width * height)));
     canvas!.width = Math.round(width * ratio); canvas!.height = Math.round(height * ratio);
     render(); start();
@@ -229,32 +231,36 @@ export function mountSculpture(root: HTMLElement) {
   canvas.addEventListener('keydown', (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     switch (event.key) {
-      case 'ArrowLeft': rotationY -= .18; break;
-      case 'ArrowRight': rotationY += .18; break;
-      case 'ArrowUp': rotationX -= .18; break;
-      case 'ArrowDown': rotationX += .18; break;
+      case 'ArrowLeft': rotationY -= .12; break;
+      case 'ArrowRight': rotationY += .12; break;
+      case 'ArrowUp': rotationX = Math.min(GROWTH_PITCH_LIMIT, rotationX + .12); break;
+      case 'ArrowDown': rotationX = Math.max(-GROWTH_PITCH_LIMIT, rotationX - .12); break;
       case 'Home': rotationX = -.24; rotationY = 0; break;
       default: return;
     }
-    event.preventDefault(); render();
+    event.preventDefault(); paused = true; stop(); updatePause(); render();
   }, { signal });
   canvas.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') { engaged = true; stop(); } }, { signal });
   canvas.addEventListener('pointerdown', event => {
-    if (event.button !== 0) return;
-    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY, touch: event.pointerType === 'touch', moved: false };
+    if (event.button !== 0 || !event.isPrimary || pointer) return;
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, lastX: event.clientX, lastY: event.clientY, span: Math.min(width, height), touch: event.pointerType === 'touch', moved: false };
+    if (!pointer.touch) canvas.setPointerCapture(event.pointerId);
     stop();
   }, { signal });
   canvas.addEventListener('pointermove', event => {
+    if (pointer && event.pointerId !== pointer.id) return;
     if (pointer && event.pointerId === pointer.id) {
       const dx = event.clientX - pointer.x, dy = event.clientY - pointer.y;
       if (!pointer.moved && Math.hypot(dx, dy) > 6 && (!pointer.touch || Math.abs(dx) > Math.abs(dy))) {
         pointer.moved = true; canvas.setPointerCapture(event.pointerId); canvas.classList.add('is-dragging');
+        hovered = -1; canvas.title = ''; canvas.style.cursor = 'grabbing'; paused = true; updatePause();
       }
       if (pointer.moved) {
-        rotationY += (event.clientX - pointer.lastX) * .007; rotationX += (event.clientY - pointer.lastY) * .007;
-        render();
+        const rotation = dragGrowth(rotationX, rotationY, event.clientX - pointer.lastX, event.clientY - pointer.lastY, pointer.span);
+        rotationX = rotation.pitch; rotationY = rotation.yaw;
+        pointer.lastX = event.clientX; pointer.lastY = event.clientY;
+        dirty = true; start();
       }
-      pointer.lastX = event.clientX; pointer.lastY = event.clientY;
     } else if (finePointer.matches) {
       const hit = pick(event.clientX, event.clientY);
       if (hit !== hovered) { hovered = hit; render(); }
@@ -269,7 +275,9 @@ export function mountSculpture(root: HTMLElement) {
       const hit = hits[pick(event.clientX, event.clientY, pointer.touch)];
       if (hit) choose(hit.branch, hit.record);
     }
+    if (pointer.moved) render();
     pointer = undefined; canvas!.classList.remove('is-dragging');
+    canvas!.style.cursor = 'grab';
     if (canvas!.hasPointerCapture(event.pointerId)) canvas!.releasePointerCapture(event.pointerId);
     start();
   }

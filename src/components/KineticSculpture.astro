@@ -9,7 +9,7 @@ const initial = graph.branches.reduce((latest, branch, index) => {
 }, undefined as { branch: number; record: number } | undefined);
 const activeBranch = initial && graph.branches[initial.branch];
 const activeRecord = activeBranch && activeBranch.records[initial!.record];
-const camera = growthCamera(graph.branches.length, 0, -.24, 0, 640, 420);
+const camera = growthCamera(graph.branches.length, 640, 420);
 const point = (branch: number, t: number) => projectPoint(branchPoint(branch, graph.branches.length, t), -.24, 0, 640, 420, camera);
 const path = (branch: number) => Array.from({ length: 33 }, (_, i) => {
   const p = point(branch, i / 32); return `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildProjectGrowth, branchPoint, growthCamera, projectPoint, recordProgress } from '../src/project-growth.ts';
+import { buildProjectGrowth, branchPoint, dragGrowth, GROWTH_PITCH_LIMIT, GROWTH_PIVOT, growthCamera, projectPoint, recordProgress } from '../src/project-growth.ts';
 
 const date = value => new Date(`${value}T00:00:00Z`);
 const project = (id, extra = {}) => ({ id, data: { title: id, description: '已有项目说明', status: '开发中', date: date('2026-10-01'), order: 1, updates: [], ...extra } });
@@ -51,8 +51,8 @@ test('nodes stay inside the drawing surface through rotation, expansion and mobi
     for (const count of [1, 4, 6]) for (const expanded of [0, .5, 1]) {
       for (let branch = 0; branch < count; branch++) for (let record = 0; record < 6; record++) {
         const point = branchPoint(branch, count, recordProgress(record, 6), expanded);
-        for (const ax of [-2, -.24, 1.2]) for (const ay of [-Math.PI, .46, 1.5, Math.PI]) {
-          const camera = growthCamera(count, expanded, ax, ay, width, height);
+        for (const ax of [-GROWTH_PITCH_LIMIT, -.24, GROWTH_PITCH_LIMIT]) for (const ay of [-Math.PI, .46, 1.5, Math.PI]) {
+          const camera = growthCamera(count, width, height);
           const projected = projectPoint(point, ax, ay, width, height, camera);
           assert.ok(Number.isFinite(projected.x) && Number.isFinite(projected.y));
           assert.ok(projected.x > 16 && projected.x < width - 16, `horizontal clipping at ${width}px`);
@@ -61,4 +61,29 @@ test('nodes stay inside the drawing surface through rotation, expansion and mobi
       }
     }
   }
+});
+
+test('orbit keeps its pivot and zoom fixed across rotation and expansion', () => {
+  const camera = growthCamera(4, 630, 432);
+  const pivot = projectPoint(GROWTH_PIVOT, -.24, 0, 630, 432, camera);
+  for (const pitch of [-.6, -.24, 0, .6]) for (const yaw of [0, .5, 1.5, Math.PI]) {
+    const projected = projectPoint(GROWTH_PIVOT, pitch, yaw, 630, 432, camera);
+    assert.equal(projected.x, pivot.x);
+    assert.equal(projected.y, pivot.y);
+    assert.deepEqual(growthCamera(4, 630, 432), camera);
+  }
+});
+
+test('grab direction, reverse movement and normalized sensitivity stay predictable', () => {
+  const first = dragGrowth(-.24, 0, 50, 25, 400);
+  assert.ok(first.yaw > 0 && first.pitch < -.24);
+  const front = projectPoint([0, -.15, 1], first.pitch, first.yaw, 630, 432, growthCamera(4, 630, 432));
+  const before = projectPoint([0, -.15, 1], -.24, 0, 630, 432, growthCamera(4, 630, 432));
+  assert.ok(front.x > before.x && front.y > before.y, 'The front of the model follows a right/down grab');
+  const reversed = dragGrowth(first.pitch, first.yaw, -50, -25, 400);
+  assert.ok(Math.abs(reversed.pitch + .24) < 1e-12 && Math.abs(reversed.yaw) < 1e-12);
+  assert.deepEqual(dragGrowth(0, 0, 40, 20, 400), dragGrowth(0, 0, 80, 40, 800));
+  const limited = dragGrowth(0, 0, 0, 1000, 400);
+  assert.equal(limited.pitch, -GROWTH_PITCH_LIMIT);
+  assert.ok(dragGrowth(limited.pitch, 0, 0, -1, 400).pitch > limited.pitch, 'Reversing at a tilt limit responds immediately');
 });

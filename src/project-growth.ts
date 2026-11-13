@@ -48,19 +48,40 @@ export function rotatePoint([x, y, z]: Vector, ax: number, ay: number): Vector {
   const px = x * Math.cos(ay) + z * Math.sin(ay), pz = -x * Math.sin(ay) + z * Math.cos(ay);
   return [px, y * Math.cos(ax) - pz * Math.sin(ax), y * Math.sin(ax) + pz * Math.cos(ax)];
 }
-type Camera = { scale: number; x: number; y: number };
-export function growthCamera(count: number, expanded: number, ax: number, ay: number, width: number, height: number): Camera {
-  const points = Array.from({ length: Math.max(1, count) }, (_, branch) => Array.from({ length: 25 }, (__, i) => {
-    const [x, y, z] = rotatePoint(branchPoint(branch, count, i / 24, expanded), ax, ay);
-    return { x: x * 9 / (9 - z), y: y * 9 / (9 - z) };
-  })).flat();
-  const xs = points.map(p => p.x), ys = points.map(p => p.y);
-  const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
-  const scale = Math.max(1, Math.min((width - 90) / Math.max(1, right - left), (height - 100) / Math.max(1, bottom - top)));
-  return { scale, x: width / 2 - (left + right) / 2 * scale, y: height / 2 + 6 - (top + bottom) / 2 * scale };
+export const GROWTH_PITCH_LIMIT = .6;
+export const GROWTH_PIVOT: Vector = [0, -.15, 0];
+type Camera = { scale: number; x: number; y: number; pivot: Vector };
+const cameraBounds = new Map<number, { left: number; right: number; top: number; bottom: number }>();
+
+/** Fit the full permitted orbit once, rather than zooming and recentering every frame. */
+export function growthCamera(count: number, width: number, height: number): Camera {
+  let bounds = cameraBounds.get(count);
+  if (!bounds) {
+    bounds = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+    for (const shape of [0, 1]) for (let branch = 0; branch < Math.max(1, count); branch++) {
+      for (let step = 0; step <= 16; step++) {
+        const point = branchPoint(branch, count, step / 16, shape).map((value, i) => value - GROWTH_PIVOT[i]) as Vector;
+        for (let yaw = 0; yaw < 32; yaw++) for (let tilt = -2; tilt <= 2; tilt++) {
+          const [x, y, z] = rotatePoint(point, tilt / 2 * GROWTH_PITCH_LIMIT, yaw / 32 * Math.PI * 2);
+          const px = x * 9 / (9 - z), py = y * 9 / (9 - z);
+          bounds.left = Math.min(bounds.left, px); bounds.right = Math.max(bounds.right, px);
+          bounds.top = Math.min(bounds.top, py); bounds.bottom = Math.max(bounds.bottom, py);
+        }
+      }
+    }
+    cameraBounds.set(count, bounds);
+  }
+  const scale = Math.max(1, Math.min((width - 80) / (bounds.right - bounds.left + .24), (height - 96) / (bounds.bottom - bounds.top + .24)));
+  return { scale, x: width / 2, y: height / 2 + 6 - (bounds.top + bounds.bottom) / 2 * scale, pivot: GROWTH_PIVOT };
+}
+
+/** Grab direction follows the front of the object, with the same gain per canvas span. */
+export function dragGrowth(pitch: number, yaw: number, dx: number, dy: number, span: number) {
+  const gain = 1.8 / Math.max(240, span);
+  return { yaw: yaw + dx * gain, pitch: Math.max(-GROWTH_PITCH_LIMIT, Math.min(GROWTH_PITCH_LIMIT, pitch - dy * gain)) };
 }
 export function projectPoint(point: Vector, ax: number, ay: number, width: number, height: number, camera?: Camera) {
-  const [x, y, z] = rotatePoint(point, ax, ay);
+  const [x, y, z] = rotatePoint(camera ? point.map((value, i) => value - camera.pivot[i]) as Vector : point, ax, ay);
   const scale = camera?.scale ?? Math.max(1, Math.min(width - 64, height - 64)) / 6.4;
   const perspective = 9 / (9 - z);
   return { x: (camera?.x ?? width * .5) + x * scale * perspective, y: (camera?.y ?? height * .5) + y * scale * perspective, z };
